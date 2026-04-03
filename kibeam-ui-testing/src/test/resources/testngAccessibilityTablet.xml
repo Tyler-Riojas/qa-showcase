@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+    Kibeam Accessibility Test Suite - Tablet Devices
+
+    Runs accessibility tests on tablet device viewports:
+    - iPad, iPad Pro 11", iPad Pro 12.9"
+    - Galaxy Tab S7
+
+    Usage:
+      mvn test -DsuiteXmlFile=src/test/resources/testngAccessibilityTablet.xml
+-->
+
+<suite name="Kibeam Accessibility - Tablet" verbose="1" parallel="methods" thread-count="4" data-provider-thread-count="4">
+
+    <!-- Report Configuration -->
+    <parameter name="reportName" value="Accessibility_Tablet_Tests"/>
+    <parameter name="reportTitle" value="Kibeam Accessibility Tablet Test Report"/>
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="listeners.AnnotationTransformer"/>
+    </listeners>
+
+    <parameter name="browser" value="chrome"/>
+
+    <test name="Tablet Accessibility Tests">
+        <groups>
+            <run>
+                <include name="tablet"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="TestNG.tests.accessibility.*"/>
+        </packages>
+    </test>
+
+</suite>

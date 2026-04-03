@@ -1,0 +1,1106 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.portfolio</groupId>
+    <artifactId>kibeam-ui-testing</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>Kibeam UI Testing</name>
+
+    <properties>
+        <!-- Logging -->
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.23</logback.version>
+
+        <!-- Core Testing -->
+        <selenium.version>4.39.0</selenium.version>
+        <testng.version>7.11.0</testng.version>
+        <wdm.version>6.3.3</wdm.version>
+
+        <!-- Utilities -->
+        <assertj.version>3.27.6</assertj.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <datafaker.version>2.5.3</datafaker.version>
+
+        <!-- Reporting -->
+        <extentreports.version>5.1.2</extentreports.version>
+        <allure.version>2.32.0</allure.version>
+        <allure-maven.version>2.17.0</allure-maven.version>
+
+        <!-- Build -->
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- Encoding -->
+        <project.encoding>UTF-8</project.encoding>
+        <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
+
+        <!-- Default TestNG suite (Chrome only for faster feedback) -->
+        <suiteXmlFile>src/test/resources/testngKibeam.xml</suiteXmlFile>
+    </properties>
+
+    <dependencies>
+        <!-- ========== LOGGING ========== -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+        <!-- ========== SELENIUM ========== -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- ========== WEBDRIVER MANAGER ========== -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${wdm.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- ========== TESTNG ========== -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+        </dependency>
+
+        <!-- ========== ASSERTIONS ========== -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+        </dependency>
+
+        <!-- ========== UTILITIES ========== -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
+        </dependency>
+
+        <!-- ========== REPORTING ========== -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extentreports.version}</version>
+        </dependency>
+
+        <!-- Allure TestNG Integration (Optional - uncomment if using Allure) -->
+        <!--
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+        </dependency>
+        -->
+
+         <!-- ========== Axe Core for accessibility ========== -->
+        <dependency>
+    		<groupId>com.deque.html.axe-core</groupId>
+    		<artifactId>selenium</artifactId>
+    		<version>4.11.0</version>
+		</dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- ========== SUREFIRE PLUGIN ========== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-testng</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <properties>
+                        <property>
+                            <name>junit</name>
+                            <value>false</value>
+                        </property>
+                    </properties>
+                    <threadCount>4</threadCount>
+                    <!-- Pass Maven properties to JVM for report naming -->
+                    <systemPropertyVariables>
+                        <test>${test}</test>
+                        <device>${device}</device>
+                        <headless>${headless}</headless>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- ========== ALLURE MAVEN PLUGIN (Optional - uncomment if using Allure) ========== -->
+            <!--
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>${allure-maven.version}</version>
+                <configuration>
+                    <reportVersion>${allure.version}</reportVersion>
+                </configuration>
+            </plugin>
+            -->
+        </plugins>
+    </build>
+
+    <!-- ========== PROFILES FOR DIFFERENT TEST SUITES ========== -->
+    <profiles>
+        <!-- Run all browsers in parallel -->
+        <profile>
+            <id>all-browsers</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngTestAllBrowsers.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run Chrome only (default behavior without profile) -->
+        <profile>
+            <id>chrome</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngChrome.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run smoke tests -->
+        <profile>
+            <id>smoke</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngSmoke.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run regression tests -->
+        <profile>
+            <id>regression</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngRegression.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- ==================== TESTNG XML SUITE PROFILES ==================== -->
+        <!-- Run Kibeam device profiles (all 11 device viewports) -->
+        <profile>
+            <id>testngKibeamDevices</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngKibeamDevices.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run all accessibility tests across all devices -->
+        <profile>
+            <id>testngAccessibilityAll</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngAccessibilityAll.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run accessibility tests on desktop viewports only -->
+        <profile>
+            <id>testngAccessibilityDesktop</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngAccessibilityDesktop.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run accessibility tests on mobile viewports only -->
+        <profile>
+            <id>testngAccessibilityMobile</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngAccessibilityMobile.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run accessibility tests on tablet viewports only -->
+        <profile>
+            <id>testngAccessibilityTablet</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngAccessibilityTablet.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run full regression suite -->
+        <profile>
+            <id>testngRegression</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngRegression.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- ╔══════════════════════════════════════════════════════════════════╗ -->
+        <!-- ║              ACCESSIBILITY TEST PROFILES                          ║ -->
+        <!-- ║                                                                    ║ -->
+        <!-- ║  DEVICE PROFILES:        PAGE PROFILES:       COMBO PROFILES:     ║ -->
+        <!-- ║  -Pmobile                -Phome               -Pmobile-home       ║ -->
+        <!-- ║  -Ptablet                -Peducators          -Ptablet-contact    ║ -->
+        <!-- ║  -Pdesktop               -Pcontact            -Pdesktop-about     ║ -->
+        <!-- ║  -Pall-devices           -Pabout              (etc...)            ║ -->
+        <!-- ║                          -Pall-pages                              ║ -->
+        <!-- ╚══════════════════════════════════════════════════════════════════╝ -->
+
+        <!-- ==================== DEVICE PROFILES ==================== -->
+        <!-- All pages on MOBILE devices -->
+        <profile>
+            <id>mobile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Mobile_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Mobile Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- All pages on TABLET devices -->
+        <profile>
+            <id>tablet</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>tablet</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Tablet_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Tablet Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- All pages on DESKTOP viewports -->
+        <profile>
+            <id>desktop</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>desktop</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Desktop_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Desktop Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>3</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- All pages on ALL devices (mobile + tablet + desktop) -->
+        <profile>
+            <id>all-devices</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile,tablet,desktop</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>6</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_All_Devices_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility All Devices Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>6</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ==================== PAGE PROFILES ==================== -->
+        <!-- HOME page on all devices -->
+        <profile>
+            <id>home</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <includes>
+                                <include>**/HomePageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Home_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Home Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- EDUCATORS page on all devices -->
+        <profile>
+            <id>educators</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <includes>
+                                <include>**/EducatorsPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Educators_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Educators Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- CONTACT page on all devices -->
+        <profile>
+            <id>contact</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <includes>
+                                <include>**/ContactPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Contact_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Contact Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ABOUT page on all devices -->
+        <profile>
+            <id>about</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <includes>
+                                <include>**/AboutPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_About_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility About Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ALL PAGES on all devices -->
+        <profile>
+            <id>all-pages</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <includes>
+                                <include>**/HomePageAccessibilityTest.java</include>
+                                <include>**/EducatorsPageAccessibilityTest.java</include>
+                                <include>**/ContactPageAccessibilityTest.java</include>
+                                <include>**/AboutPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>6</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_All_Pages_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility All Pages Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>6</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ==================== DEVICE + PAGE COMBO PROFILES ==================== -->
+        <!-- MOBILE + specific pages -->
+        <profile>
+            <id>mobile-home</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile</groups>
+                            <includes>
+                                <include>**/HomePageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Mobile_Home_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Mobile Home Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mobile-educators</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile</groups>
+                            <includes>
+                                <include>**/EducatorsPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Mobile_Educators_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Mobile Educators Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mobile-contact</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile</groups>
+                            <includes>
+                                <include>**/ContactPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Mobile_Contact_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Mobile Contact Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mobile-about</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile</groups>
+                            <includes>
+                                <include>**/AboutPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Mobile_About_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Mobile About Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- TABLET + specific pages -->
+        <profile>
+            <id>tablet-home</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>tablet</groups>
+                            <includes>
+                                <include>**/HomePageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Tablet_Home_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Tablet Home Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>tablet-educators</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>tablet</groups>
+                            <includes>
+                                <include>**/EducatorsPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Tablet_Educators_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Tablet Educators Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>tablet-contact</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>tablet</groups>
+                            <includes>
+                                <include>**/ContactPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Tablet_Contact_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Tablet Contact Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>tablet-about</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>tablet</groups>
+                            <includes>
+                                <include>**/AboutPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Tablet_About_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Tablet About Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- DESKTOP + specific pages -->
+        <profile>
+            <id>desktop-home</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>desktop</groups>
+                            <includes>
+                                <include>**/HomePageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Desktop_Home_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Desktop Home Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>3</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>desktop-educators</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>desktop</groups>
+                            <includes>
+                                <include>**/EducatorsPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Desktop_Educators_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Desktop Educators Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>3</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>desktop-contact</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>desktop</groups>
+                            <includes>
+                                <include>**/ContactPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Desktop_Contact_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Desktop Contact Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>3</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>desktop-about</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>desktop</groups>
+                            <includes>
+                                <include>**/AboutPageAccessibilityTest.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Desktop_About_Tests</reportName>
+                                <reportTitle>Kibeam Accessibility Desktop About Page Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>3</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ========== ENVIRONMENT PROFILES ========== -->
+        <!-- Development environment -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <env>dev</env>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Staging environment -->
+        <profile>
+            <id>staging</id>
+            <properties>
+                <env>staging</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <env>staging</env>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Production environment -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <env>prod</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <env>prod</env>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
+</project>

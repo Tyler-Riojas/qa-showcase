@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+    Kibeam Accessibility Test Suite - Desktop Viewports
+
+    Runs accessibility tests on desktop viewports:
+    - Laptop (1280x800), Laptop L (1440x900)
+    - Desktop HD (1366x768), FHD (1920x1080)
+
+    Usage:
+      mvn test -DsuiteXmlFile=src/test/resources/testngAccessibilityDesktop.xml
+-->
+
+<suite name="Kibeam Accessibility - Desktop" verbose="1" parallel="methods" thread-count="4" data-provider-thread-count="3">
+
+    <!-- Report Configuration -->
+    <parameter name="reportName" value="Accessibility_Desktop_Tests"/>
+    <parameter name="reportTitle" value="Kibeam Accessibility Desktop Test Report"/>
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="listeners.AnnotationTransformer"/>
+    </listeners>
+
+    <parameter name="browser" value="chrome"/>
+
+    <test name="Desktop Accessibility Tests">
+        <groups>
+            <run>
+                <include name="desktop"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="TestNG.tests.accessibility.*"/>
+        </packages>
+    </test>
+
+</suite>

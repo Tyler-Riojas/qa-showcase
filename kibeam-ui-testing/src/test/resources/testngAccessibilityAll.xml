@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+    Kibeam Accessibility Test Suite - All Devices (Parallel)
+
+    Runs accessibility tests on ALL device viewports in parallel:
+    - Mobile: iPhone SE, iPhone 12, iPhone 14 Pro Max, Pixel 5, Samsung S21
+    - Tablet: iPad, iPad Pro 11", iPad Pro 12.9", Galaxy Tab S7
+    - Desktop: Laptop, Laptop L, Desktop HD, FHD
+
+    Parallel execution: 3 threads (one per device category)
+
+    Usage:
+      mvn test -DsuiteXmlFile=src/test/resources/testngAccessibilityAll.xml
+      mvn test -P accessibility-all
+-->
+
+<suite name="Kibeam Accessibility - All Devices"
+       verbose="1"
+       parallel="tests"
+       thread-count="3"
+       data-provider-thread-count="4">
+
+    <!-- Report Configuration -->
+    <parameter name="reportName" value="Accessibility_All_Devices_Tests"/>
+    <parameter name="reportTitle" value="Kibeam Accessibility All Devices Test Report"/>
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="listeners.AnnotationTransformer"/>
+    </listeners>
+
+    <parameter name="browser" value="chrome"/>
+
+    <!-- Mobile Devices - All Pages -->
+    <test name="Mobile Accessibility">
+        <groups>
+            <run>
+                <include name="mobile"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="TestNG.tests.accessibility.*"/>
+        </packages>
+    </test>
+
+    <!-- Tablet Devices - All Pages -->
+    <test name="Tablet Accessibility">
+        <groups>
+            <run>
+                <include name="tablet"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="TestNG.tests.accessibility.*"/>
+        </packages>
+    </test>
+
+    <!-- Desktop Viewports - All Pages -->
+    <test name="Desktop Accessibility">
+        <groups>
+            <run>
+                <include name="desktop"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="TestNG.tests.accessibility.*"/>
+        </packages>
+    </test>
+
+</suite>

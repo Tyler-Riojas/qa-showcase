@@ -1,0 +1,119 @@
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Kibeam Device Emulation Suite" parallel="tests" thread-count="4">
+
+    <!-- Report Configuration -->
+    <parameter name="reportName" value="Device_Emulation_Tests"/>
+    <parameter name="reportTitle" value="Kibeam Device Emulation Test Report"/>
+
+    <listeners>
+        <listener class-name="listeners.AnnotationTransformer"/>
+        <listener class-name="listeners.TestListenerTestNG"/>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+    </listeners>
+
+    <!-- ========== MOBILE DEVICES ========== -->
+
+    <test name="Kibeam Responsive - iPhone SE">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="IPHONE_SE"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - iPhone 12">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="IPHONE_12"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - iPhone 14 Pro Max">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="IPHONE_14_PRO_MAX"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - Pixel 5">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="PIXEL_5"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - Samsung S21">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="SAMSUNG_S21"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <!-- ========== TABLET DEVICES ========== -->
+
+    <test name="Kibeam Responsive - iPad">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="IPAD"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - iPad Pro 11">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="IPAD_PRO_11"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - Galaxy Tab S7">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="GALAXY_TAB_S7"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <!-- ========== DESKTOP VIEWPORTS ========== -->
+
+    <test name="Kibeam Responsive - Laptop">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="LAPTOP"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - Desktop HD">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="DESKTOP_HD"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+    <test name="Kibeam Responsive - Desktop FHD">
+        <parameter name="browser" value="chrome"/>
+        <parameter name="device" value="DESKTOP_FHD"/>
+        <classes>
+            <class name="TestNG.tests.KibeamResponsiveTest"/>
+            <class name="TestNG.tests.KibeamNavigationTest"/>
+        </classes>
+    </test>
+
+</suite>

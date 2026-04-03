@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+
+<!--
+    Kibeam Accessibility Test Suite - Mobile Devices
+
+    Runs accessibility tests on mobile device viewports:
+    - iPhone SE, iPhone 12, iPhone 14 Pro Max
+    - Pixel 5, Samsung S21
+
+    Usage:
+      mvn test -DsuiteXmlFile=src/test/resources/testngAccessibilityMobile.xml
+-->
+
+<suite name="Kibeam Accessibility - Mobile" verbose="1" parallel="methods" thread-count="4" data-provider-thread-count="5">
+
+    <!-- Report Configuration -->
+    <parameter name="reportName" value="Accessibility_Mobile_Tests"/>
+    <parameter name="reportTitle" value="Kibeam Accessibility Mobile Test Report"/>
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="listeners.AnnotationTransformer"/>
+    </listeners>
+
+    <parameter name="browser" value="chrome"/>
+
+    <test name="Mobile Accessibility Tests">
+        <groups>
+            <run>
+                <include name="mobile"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="TestNG.tests.accessibility.*"/>
+        </packages>
+    </test>
+
+</suite>

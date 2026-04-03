@@ -1,0 +1,36 @@
+# Build outputs
+target/
+build/
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Test outputs
+screenshots/
+test-output/
+logs/
+allure-results/
+allure-report/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven
+dependency-reduced-pom.xml
+
+# Compiled files
+*.class
+*.jar
+*.war
+
+# Extent Reports (served as pipeline artifacts; too large to commit)
+reports/*.html
+
+# Local workflow logs
+.github/workflows/*.log
