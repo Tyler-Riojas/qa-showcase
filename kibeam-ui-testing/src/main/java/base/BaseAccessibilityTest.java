@@ -372,8 +372,7 @@ public class BaseAccessibilityTest extends BaseTestTestNG {
                                        List<AccessibilityIssue> issues) {
         ExtentTest extentTest = ExtentReportManager.getTest();
         if (extentTest != null) {
-            // Pass driver for element screenshots on failures
-            AccessibilityReporter.attachCombinedReport(extentTest, violations, issues, getDriver());
+            AccessibilityReporter.attachCombinedReport(extentTest, violations, issues);
         } else {
             log.debug("ExtentTest not available, skipping report attachment");
         }

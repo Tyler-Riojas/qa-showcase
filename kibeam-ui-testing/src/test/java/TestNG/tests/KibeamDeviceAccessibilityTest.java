@@ -340,7 +340,7 @@ public class KibeamDeviceAccessibilityTest extends BaseAccessibilityTest {
         extentTest.info(contextInfo);
 
         // Pass WebDriver for element screenshots - uses enhanced combined report format
-        AccessibilityReporter.attachCombinedReport(extentTest, result.axeViolations, result.customIssues, getDriver());
+        AccessibilityReporter.attachCombinedReport(extentTest, result.axeViolations, result.customIssues);
     }
 
     /**
@@ -520,12 +520,10 @@ public class KibeamDeviceAccessibilityTest extends BaseAccessibilityTest {
 
             for (var entry : pageResults.entrySet()) {
                 var node = extentTest.createNode("📄 " + entry.getKey() + " Page");
-                // Pass WebDriver for element screenshots on failures - uses enhanced format
                 AccessibilityReporter.attachCombinedReport(
                         node,
                         entry.getValue().axeViolations,
-                        entry.getValue().customIssues,
-                        getDriver());
+                        entry.getValue().customIssues);
             }
         }
     }

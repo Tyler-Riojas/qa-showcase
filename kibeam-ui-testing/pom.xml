@@ -141,6 +141,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <argLine>-Xms512m -Xmx4096m</argLine>
                     <suiteXmlFiles>
                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>

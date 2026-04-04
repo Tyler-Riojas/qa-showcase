@@ -4,9 +4,6 @@ import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.Status;
 import com.aventstack.extentreports.markuputils.ExtentColor;
 import com.aventstack.extentreports.markuputils.MarkupHelper;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,6 +66,10 @@ public final class AccessibilityReporter {
     // Formatting constants
     private static final String SEPARATOR = "─".repeat(70);
     private static final String DOUBLE_SEPARATOR = "═".repeat(70);
+
+    // Memory guard — limits how many violations are rendered as full cards in the HTML report.
+    // Console logging (logAxeViolations) is unaffected and always logs everything.
+    private static final int MAX_VIOLATIONS_IN_REPORT = 10;
 
     private AccessibilityReporter() {
         // Prevent instantiation - utility class
@@ -173,18 +174,6 @@ public final class AccessibilityReporter {
      * @param violations list of Axe-core violations
      */
     public static void attachAxeViolationsToReport(ExtentTest test, List<AccessibilityViolation> violations) {
-        attachAxeViolationsToReport(test, violations, null);
-    }
-
-    /**
-     * Attaches Axe-core violations to an ExtentTest report with element screenshots.
-     * Uses enhanced format with summary at top and collapsible severity groups.
-     *
-     * @param test       ExtentTest instance to attach violations to
-     * @param violations list of Axe-core violations
-     * @param driver     WebDriver for capturing element screenshots (can be null to skip screenshots)
-     */
-    public static void attachAxeViolationsToReport(ExtentTest test, List<AccessibilityViolation> violations, WebDriver driver) {
         if (test == null) {
             log.warn("ExtentTest is null, skipping report attachment");
             return;
@@ -197,20 +186,13 @@ public final class AccessibilityReporter {
         }
 
         // Use the combined report format with just Axe violations
-        attachCombinedReport(test, violations, null, driver);
+        attachCombinedReport(test, violations, null);
     }
 
     /**
-     * Attaches a single Axe-core violation to the ExtentTest (without screenshot).
+     * Attaches a single Axe-core violation to the ExtentTest.
      */
     private static void attachSingleAxeViolation(ExtentTest test, AccessibilityViolation violation) {
-        attachSingleAxeViolation(test, violation, null);
-    }
-
-    /**
-     * Attaches a single Axe-core violation to the ExtentTest with optional element screenshot.
-     */
-    private static void attachSingleAxeViolation(ExtentTest test, AccessibilityViolation violation, WebDriver driver) {
         Status status = mapImpactToStatus(violation.getImpact());
         ExtentColor color = mapImpactToColor(violation.getImpact());
 
@@ -238,12 +220,6 @@ public final class AccessibilityReporter {
                 {"How to Fix", createHyperlink(violation.getHelpUrl(), "View Documentation")}
         };
         test.log(Status.INFO, MarkupHelper.createTable(detailsData));
-
-        // Capture element screenshots if driver is available
-        if (driver != null && violation.hasElementInfo()) {
-            captureAndAttachElementScreenshots(test, driver, violation.getElementSelectors(),
-                    violation.getRuleId(), violation.getImpact());
-        }
     }
 
     /**
@@ -253,18 +229,6 @@ public final class AccessibilityReporter {
      * @param issues list of custom checker issues
      */
     public static void attachCustomIssuesToReport(ExtentTest test, List<AccessibilityIssue> issues) {
-        attachCustomIssuesToReport(test, issues, null);
-    }
-
-    /**
-     * Attaches custom checker issues to an ExtentTest report with element screenshots.
-     * Uses enhanced format with summary at top and collapsible severity groups.
-     *
-     * @param test   ExtentTest instance to attach issues to
-     * @param issues list of custom checker issues
-     * @param driver WebDriver for capturing element screenshots (can be null to skip screenshots)
-     */
-    public static void attachCustomIssuesToReport(ExtentTest test, List<AccessibilityIssue> issues, WebDriver driver) {
         if (test == null) {
             log.warn("ExtentTest is null, skipping report attachment");
             return;
@@ -277,20 +241,13 @@ public final class AccessibilityReporter {
         }
 
         // Use the combined report format with just custom issues
-        attachCombinedReport(test, null, issues, driver);
+        attachCombinedReport(test, null, issues);
     }
 
     /**
-     * Attaches a single custom checker issue to the ExtentTest (without screenshot).
+     * Attaches a single custom checker issue to the ExtentTest.
      */
     private static void attachSingleCustomIssue(ExtentTest test, AccessibilityIssue issue) {
-        attachSingleCustomIssue(test, issue, null);
-    }
-
-    /**
-     * Attaches a single custom checker issue to the ExtentTest with optional element screenshot.
-     */
-    private static void attachSingleCustomIssue(ExtentTest test, AccessibilityIssue issue, WebDriver driver) {
         Status status = mapSeverityToStatus(issue.getSeverity());
         ExtentColor color = mapSeverityToColor(issue.getSeverity());
 
@@ -307,16 +264,12 @@ public final class AccessibilityReporter {
                 {"How to Fix", issue.getRecommendation()}
         };
         test.log(Status.INFO, MarkupHelper.createTable(detailsData));
-
-        // Capture element screenshot if driver is available
-        if (driver != null && issue.getElementSelector() != null && !issue.getElementSelector().isEmpty()) {
-            captureAndAttachElementScreenshot(test, driver, issue.getElementSelector(),
-                    issue.getType().name(), issue.getSeverity().name());
-        }
     }
 
     /**
      * Attaches a combined accessibility report section to ExtentTest.
+     * Features: Summary at top, separate sections for Axe-core and Custom checker,
+     * collapsible severity groups within each section.
      *
      * @param test       ExtentTest instance
      * @param violations Axe-core violations (may be null)
@@ -325,26 +278,23 @@ public final class AccessibilityReporter {
     public static void attachCombinedReport(ExtentTest test,
                                              List<AccessibilityViolation> violations,
                                              List<AccessibilityIssue> issues) {
-        attachCombinedReport(test, violations, issues, null);
-    }
-
-    /**
-     * Attaches a combined accessibility report section to ExtentTest with element screenshots.
-     * Features: Summary at top, separate sections for Axe-core and Custom checker,
-     * collapsible severity groups within each section.
-     *
-     * @param test       ExtentTest instance
-     * @param violations Axe-core violations (may be null)
-     * @param issues     Custom checker issues (may be null)
-     * @param driver     WebDriver for capturing element screenshots (can be null to skip screenshots)
-     */
-    public static void attachCombinedReport(ExtentTest test,
-                                             List<AccessibilityViolation> violations,
-                                             List<AccessibilityIssue> issues,
-                                             WebDriver driver) {
         if (test == null) {
             log.warn("ExtentTest is null, skipping report attachment");
             return;
+        }
+
+        // Log summary and apply report cap before building any HTML
+        int totalViolations = violations != null ? violations.size() : 0;
+        int totalIssues = issues != null ? issues.size() : 0;
+        log.info("Accessibility report: {} violations found, showing top {} in report, full list in console",
+                totalViolations, Math.min(totalViolations, MAX_VIOLATIONS_IN_REPORT));
+
+        // Truncate violations list for report rendering — console log is unchanged
+        if (violations != null && violations.size() > MAX_VIOLATIONS_IN_REPORT) {
+            int truncated = violations.size() - MAX_VIOLATIONS_IN_REPORT;
+            log.info("Truncating report HTML to top {} violations ({} omitted — see console for full list)",
+                    MAX_VIOLATIONS_IN_REPORT, truncated);
+            violations = violations.subList(0, MAX_VIOLATIONS_IN_REPORT);
         }
 
         try {
@@ -370,7 +320,7 @@ public final class AccessibilityReporter {
             // 2. AXE-CORE VIOLATIONS SECTION (separate category)
             if (!noViolations) {
                 try {
-                    test.info(generateAxeCoreSection(violations, driver));
+                    test.info(generateAxeCoreSection(violations));
                 } catch (Exception e) {
                     log.warn("Failed to generate Axe-core section: {}", e.getMessage());
                     test.warning("Axe-core violations: " + violations.size());
@@ -380,7 +330,7 @@ public final class AccessibilityReporter {
             // 3. CUSTOM CHECKER ISSUES SECTION (separate category)
             if (!noIssues) {
                 try {
-                    test.info(generateCustomCheckerSection(issues, driver));
+                    test.info(generateCustomCheckerSection(issues));
                 } catch (Exception e) {
                     log.warn("Failed to generate Custom checker section: {}", e.getMessage());
                     test.warning("Custom checker issues: " + issues.size());
@@ -399,7 +349,7 @@ public final class AccessibilityReporter {
     /**
      * Generate the Axe-core violations section with severity groupings.
      */
-    private static String generateAxeCoreSection(List<AccessibilityViolation> violations, WebDriver driver) {
+    private static String generateAxeCoreSection(List<AccessibilityViolation> violations) {
         if (violations == null || violations.isEmpty()) {
             return "";
         }
@@ -434,19 +384,19 @@ public final class AccessibilityReporter {
 
         // Critical
         if (bySeverity.containsKey("critical")) {
-            html.append(generateCollapsibleSection("🔴 CRITICAL", bySeverity.get("critical"), driver, true));
+            html.append(generateCollapsibleSection("🔴 CRITICAL", bySeverity.get("critical"), true));
         }
         // Serious
         if (bySeverity.containsKey("serious")) {
-            html.append(generateCollapsibleSection("🟠 SERIOUS", bySeverity.get("serious"), driver, true));
+            html.append(generateCollapsibleSection("🟠 SERIOUS", bySeverity.get("serious"), true));
         }
         // Moderate
         if (bySeverity.containsKey("moderate")) {
-            html.append(generateCollapsibleSection("🟡 MODERATE", bySeverity.get("moderate"), driver, false));
+            html.append(generateCollapsibleSection("🟡 MODERATE", bySeverity.get("moderate"), false));
         }
         // Minor
         if (bySeverity.containsKey("minor")) {
-            html.append(generateCollapsibleSection("🟢 MINOR", bySeverity.get("minor"), driver, false));
+            html.append(generateCollapsibleSection("🟢 MINOR", bySeverity.get("minor"), false));
         }
 
         html.append("</div>");
@@ -458,7 +408,7 @@ public final class AccessibilityReporter {
     /**
      * Generate the Custom checker issues section with severity groupings.
      */
-    private static String generateCustomCheckerSection(List<AccessibilityIssue> issues, WebDriver driver) {
+    private static String generateCustomCheckerSection(List<AccessibilityIssue> issues) {
         if (issues == null || issues.isEmpty()) {
             return "";
         }
@@ -493,15 +443,15 @@ public final class AccessibilityReporter {
 
         // Critical
         if (bySeverity.containsKey("critical")) {
-            html.append(generateCollapsibleSection("🔴 CRITICAL", bySeverity.get("critical"), driver, true));
+            html.append(generateCollapsibleSection("🔴 CRITICAL", bySeverity.get("critical"), true));
         }
         // Moderate (custom checker uses moderate instead of serious)
         if (bySeverity.containsKey("moderate")) {
-            html.append(generateCollapsibleSection("🟡 MODERATE", bySeverity.get("moderate"), driver, false));
+            html.append(generateCollapsibleSection("🟡 MODERATE", bySeverity.get("moderate"), false));
         }
         // Minor
         if (bySeverity.containsKey("minor")) {
-            html.append(generateCollapsibleSection("🟢 MINOR", bySeverity.get("minor"), driver, false));
+            html.append(generateCollapsibleSection("🟢 MINOR", bySeverity.get("minor"), false));
         }
 
         html.append("</div>");
@@ -688,7 +638,7 @@ public final class AccessibilityReporter {
      * Generate collapsible section HTML with violations grouped by severity.
      */
     private static String generateCollapsibleSection(String title, List<ViolationEntry> entries,
-                                                      WebDriver driver, boolean expandedByDefault) {
+                                                      boolean expandedByDefault) {
         if (entries == null || entries.isEmpty()) {
             return "";
         }
@@ -714,7 +664,7 @@ public final class AccessibilityReporter {
 
         for (int i = 0; i < entries.size(); i++) {
             ViolationEntry entry = entries.get(i);
-            html.append(generateViolationCard(entry, i + 1, driver));
+            html.append(generateViolationCard(entry, i + 1));
         }
 
         html.append("</div>");
@@ -724,9 +674,9 @@ public final class AccessibilityReporter {
     }
 
     /**
-     * Generate individual violation card with screenshot and details.
+     * Generate individual violation card with details and developer guidance.
      */
-    private static String generateViolationCard(ViolationEntry entry, int index, WebDriver driver) {
+    private static String generateViolationCard(ViolationEntry entry, int index) {
         if (entry == null) {
             return "<div style='padding: 10px; color: #999;'>Invalid entry</div>";
         }
@@ -803,28 +753,59 @@ public final class AccessibilityReporter {
 
             html.append("</div>");
 
-            // Right column: Screenshot
-            html.append("<div style='flex: 0 0 300px; padding: 15px; background: #f9f9f9; ")
-                .append("border-left: 1px solid #eee;'>");
-            html.append("<p style='color: #666; font-size: 12px; margin: 0 0 10px 0;'>")
-                .append("<strong>📸 Element Screenshot</strong></p>");
+            // Right column: Developer guidance (selectors, WCAG links, impact, effort, testing tip)
+            html.append("<div style='flex: 0 0 280px; padding: 15px; background: #f9f9f9; ")
+                .append("border-left: 1px solid #eee; font-size: 12px;'>");
 
-            // Capture and embed screenshot if driver available
-            if (driver != null && entry.selectors != null && !entry.selectors.isEmpty() && entry.selectors.get(0) != null) {
-                try {
-                    String screenshotHtml = captureScreenshotForCard(driver, entry.selectors.get(0));
-                    if (screenshotHtml != null) {
-                        html.append(screenshotHtml);
-                    } else {
-                        html.append("<p style='color: #999; font-style: italic;'>Screenshot unavailable</p>");
+            // All affected element selectors (up to 5)
+            if (entry.selectors != null && !entry.selectors.isEmpty()) {
+                int selectorCount = Math.min(entry.selectors.size(), 5);
+                html.append("<p style='margin: 0 0 5px 0; color: #333;'><strong>🎯 Affected Elements (")
+                    .append(entry.nodeCount).append(")</strong></p>");
+                for (int s = 0; s < selectorCount; s++) {
+                    String sel = entry.selectors.get(s);
+                    if (sel != null) {
+                        html.append("<code style='display: block; background: #efefef; padding: 2px 5px; ")
+                            .append("border-radius: 3px; margin-bottom: 3px; word-break: break-all; font-size: 10px;'>")
+                            .append(escapeHtml(truncateSelector(sel))).append("</code>");
                     }
-                } catch (Exception e) {
-                    log.debug("Screenshot capture failed: {}", e.getMessage());
-                    html.append("<p style='color: #999; font-style: italic;'>Screenshot failed</p>");
                 }
-            } else {
-                html.append("<p style='color: #999; font-style: italic;'>No screenshot</p>");
+                if (entry.selectors.size() > 5) {
+                    html.append("<span style='color: #888; font-style: italic; font-size: 11px;'>+ ")
+                        .append(entry.selectors.size() - 5).append(" more</span>");
+                }
             }
+
+            // WCAG criteria links
+            if (entry.tags != null) {
+                List<String> wcagCriteria = entry.tags.stream()
+                    .filter(t -> t != null && t.matches("wcag\\d{3,4}"))
+                    .collect(Collectors.toList());
+                if (!wcagCriteria.isEmpty()) {
+                    html.append("<p style='margin: 10px 0 5px 0; color: #333;'><strong>📋 WCAG Criteria</strong></p>");
+                    for (String criterion : wcagCriteria) {
+                        html.append("<a href='").append(buildWcagUrl(criterion)).append("' target='_blank' ")
+                            .append("style='display: block; color: #1565c0; margin-bottom: 3px; text-decoration: none;'>")
+                            .append("SC ").append(formatWcagTag(criterion)).append(" ↗</a>");
+                    }
+                }
+            }
+
+            // User impact
+            html.append("<p style='margin: 10px 0 5px 0; color: #333;'><strong>👥 User Impact</strong></p>");
+            html.append("<p style='margin: 0 0 8px 0; color: #555; line-height: 1.4;'>")
+                .append(escapeHtml(getUserImpact(entry.ruleName, entry.severity))).append("</p>");
+
+            // Fix effort
+            html.append("<p style='margin: 0 0 5px 0; color: #333;'><strong>🔧 Fix Effort</strong></p>");
+            html.append("<span style='display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; ")
+                .append("background: ").append(getFixEffortColor(entry.severity)).append("; color: white; margin-bottom: 8px;'>")
+                .append(escapeHtml(getFixEffort(entry.severity))).append("</span>");
+
+            // Manual testing tip
+            html.append("<p style='margin: 8px 0 5px 0; color: #333;'><strong>🧪 How to Test</strong></p>");
+            html.append("<p style='margin: 0; color: #555; line-height: 1.4; font-style: italic;'>")
+                .append(escapeHtml(getManualTestTip(entry.ruleName))).append("</p>");
 
             html.append("</div>");
             html.append("</div>"); // End flex container
@@ -838,59 +819,6 @@ public final class AccessibilityReporter {
                 .append("<strong>").append(entry.ruleName != null ? escapeHtml(entry.ruleName) : "Unknown").append("</strong>")
                 .append(" - ").append(entry.description != null ? escapeHtml(entry.description) : "No description")
                 .append("</div>");
-        }
-
-        return html.toString();
-    }
-
-    /**
-     * Capture screenshot and return as embedded HTML with clickable lightbox.
-     */
-    private static String captureScreenshotForCard(WebDriver driver, String selector) {
-        if (selector == null || selector.isEmpty() || driver == null) {
-            return null;
-        }
-
-        try {
-            WebElement element = driver.findElement(By.cssSelector(selector));
-            String base64 = ScreenshotUtils.captureElementScreenshotAsBase64(driver, element);
-            if (base64 != null) {
-                return generateClickableScreenshot(base64, "Element Screenshot", false);
-            }
-        } catch (Exception e) {
-            // Try full page screenshot as fallback
-            try {
-                String base64 = ScreenshotUtils.captureScreenshotAsBase64(driver);
-                if (base64 != null) {
-                    return generateClickableScreenshot(base64, "Full Page (element not found)", true);
-                }
-            } catch (Exception ex) {
-                log.debug("Failed to capture fallback screenshot: {}", ex.getMessage());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Generate screenshot HTML. Right-click to open in new tab.
-     */
-    private static String generateClickableScreenshot(String base64, String caption, boolean isFullPage) {
-        String escapedCaption = escapeHtml(caption);
-        String dataUri = "data:image/png;base64," + base64;
-
-        StringBuilder html = new StringBuilder();
-
-        // Screenshot image - right-click to open in new tab
-        html.append("<img src='").append(dataUri).append("' ")
-            .append("style='max-width: 100%; max-height: 200px; border: 2px solid #ddd; ")
-            .append("border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);' ")
-            .append("alt='").append(escapedCaption).append("' ")
-            .append("title='Right-click to open in new tab'/>");
-
-        // Caption for full page screenshots
-        if (isFullPage) {
-            html.append("<p style='font-size: 10px; color: #999; margin: 5px 0 0 0;'>(")
-                .append(escapedCaption).append(")</p>");
         }
 
         return html.toString();
@@ -1063,95 +991,6 @@ public final class AccessibilityReporter {
         threadStats.remove();
     }
 
-    // ==================== ELEMENT SCREENSHOT METHODS ====================
-
-    /**
-     * Captures and attaches screenshots for multiple element selectors.
-     *
-     * @param test      ExtentTest to attach screenshots to
-     * @param driver    WebDriver instance
-     * @param selectors List of CSS selectors for elements
-     * @param ruleId    Axe rule ID for naming
-     * @param impact    Impact level for naming
-     */
-    private static void captureAndAttachElementScreenshots(ExtentTest test, WebDriver driver,
-                                                            List<String> selectors, String ruleId, String impact) {
-        if (selectors == null || selectors.isEmpty()) {
-            return;
-        }
-
-        // Limit screenshots to avoid report bloat
-        int maxScreenshots = Math.min(selectors.size(), 3);
-
-        for (int i = 0; i < maxScreenshots; i++) {
-            String selector = selectors.get(i);
-            String screenshotName = sanitizeForFilename(ruleId) + "_" + (i + 1);
-            captureAndAttachElementScreenshot(test, driver, selector, screenshotName, impact);
-        }
-
-        if (selectors.size() > maxScreenshots) {
-            test.info(String.format("Note: %d additional element(s) not captured to limit report size",
-                    selectors.size() - maxScreenshots));
-        }
-    }
-
-    /**
-     * Captures and attaches a screenshot for a single element.
-     *
-     * @param test       ExtentTest to attach screenshot to
-     * @param driver     WebDriver instance
-     * @param selector   CSS selector for the element
-     * @param issueName  Name for the issue (used in filename)
-     * @param severity   Severity level for naming
-     */
-    private static void captureAndAttachElementScreenshot(ExtentTest test, WebDriver driver,
-                                                           String selector, String issueName, String severity) {
-        if (selector == null || selector.isEmpty() || driver == null) {
-            return;
-        }
-
-        try {
-            // Try to find and screenshot the element
-            WebElement element = driver.findElement(By.cssSelector(selector));
-            String base64Screenshot = ScreenshotUtils.captureElementScreenshotAsBase64(driver, element);
-
-            if (base64Screenshot != null) {
-                // Attach to report with descriptive caption
-                String caption = String.format("[%s] %s - %s",
-                        severity.toUpperCase(), issueName, truncateSelector(selector));
-                test.info(caption)
-                    .addScreenCaptureFromBase64String(base64Screenshot, caption);
-                log.debug("Captured element screenshot for: {}", truncateSelector(selector));
-            }
-        } catch (org.openqa.selenium.NoSuchElementException e) {
-            log.debug("Element not found for screenshot: {}", truncateSelector(selector));
-            // Try highlighted full-page screenshot as fallback
-            captureFullPageWithAnnotation(test, driver, selector, issueName, severity);
-        } catch (org.openqa.selenium.StaleElementReferenceException e) {
-            log.debug("Stale element, skipping screenshot: {}", truncateSelector(selector));
-        } catch (Exception e) {
-            log.warn("Failed to capture element screenshot: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Captures a full-page screenshot with annotation when element capture fails.
-     */
-    private static void captureFullPageWithAnnotation(ExtentTest test, WebDriver driver,
-                                                       String selector, String issueName, String severity) {
-        try {
-            String base64Screenshot = ScreenshotUtils.captureScreenshotAsBase64(driver);
-            if (base64Screenshot != null) {
-                String caption = String.format("[%s] %s (full page) - Element: %s",
-                        severity.toUpperCase(), issueName, truncateSelector(selector));
-                test.info(caption)
-                    .addScreenCaptureFromBase64String(base64Screenshot, caption);
-            }
-        } catch (Exception e) {
-            log.debug("Failed to capture fallback full-page screenshot: {}", e.getMessage());
-        }
-    }
-
     /**
      * Truncates a CSS selector for display purposes.
      */
@@ -1162,13 +1001,127 @@ public final class AccessibilityReporter {
     }
 
     /**
-     * Sanitizes a string for use in filenames.
+     * Returns a human-readable description of user impact for a given accessibility rule.
      */
-    private static String sanitizeForFilename(String name) {
-        if (name == null) return "element";
-        return name.replaceAll("[^a-zA-Z0-9._-]", "_")
-                   .replaceAll("_+", "_")
-                   .replaceAll("^_|_$", "");
+    private static String getUserImpact(String ruleName, String severity) {
+        if (ruleName == null) return "Users relying on assistive technology may be affected.";
+        return switch (ruleName.toLowerCase()) {
+            case "color-contrast", "color-contrast-enhanced" ->
+                "Users with low vision or color blindness may be unable to read this text.";
+            case "image-alt" ->
+                "Screen reader users receive no information about this image.";
+            case "label", "label-content-name-mismatch" ->
+                "Screen reader users cannot identify this form field.";
+            case "link-name" ->
+                "Screen reader users cannot understand where this link leads.";
+            case "button-name" ->
+                "Screen reader users cannot determine the purpose of this button.";
+            case "document-title" ->
+                "Screen reader users cannot identify this page in browser history.";
+            case "html-has-lang", "html-lang-valid" ->
+                "Screen reader software cannot announce the correct language.";
+            case "heading-order" ->
+                "Screen reader users navigating by headings may miss content or be confused.";
+            case "region" ->
+                "Screen reader users navigating by landmark regions may miss this content.";
+            case "list", "listitem", "definition-list", "dlitem" ->
+                "Assistive technology cannot convey list structure to screen reader users.";
+            case "tabindex" ->
+                "Keyboard-only users may be unable to navigate the page in a logical order.";
+            case "focus-order-semantics", "focus-visible" ->
+                "Keyboard-only users cannot tell which element currently has focus.";
+            case "aria-allowed-attr", "aria-required-attr", "aria-valid-attr", "aria-valid-attr-value" ->
+                "Assistive technology receives incorrect or missing role/state information.";
+            case "aria-hidden-body", "aria-hidden-focus" ->
+                "Screen reader users may not be able to interact with this content.";
+            case "scrollable-region-focusable" ->
+                "Keyboard-only users cannot scroll this region.";
+            case "keyboard", "frame-focusable-content" ->
+                "Keyboard-only users cannot access this functionality.";
+            default -> severity != null && (severity.equals("critical") || severity.equals("serious"))
+                ? "Significant barrier for users relying on assistive technology."
+                : "May cause difficulty for some users with disabilities.";
+        };
+    }
+
+    /**
+     * Returns an estimated fix effort label based on violation severity.
+     */
+    private static String getFixEffort(String severity) {
+        if (severity == null) return "Unknown";
+        return switch (severity.toLowerCase()) {
+            case "critical" -> "Significant — blocking issue, fix immediately";
+            case "serious"  -> "Significant — high priority, fix in current sprint";
+            case "moderate" -> "Moderate — schedule for upcoming sprint";
+            case "minor"    -> "Minor — schedule for future sprint";
+            default         -> "Unknown";
+        };
+    }
+
+    /**
+     * Returns a badge background color for the fix effort indicator.
+     */
+    private static String getFixEffortColor(String severity) {
+        if (severity == null) return "#9e9e9e";
+        return switch (severity.toLowerCase()) {
+            case "critical" -> "#c62828";
+            case "serious"  -> "#ef6c00";
+            case "moderate" -> "#f9a825";
+            case "minor"    -> "#2e7d32";
+            default         -> "#9e9e9e";
+        };
+    }
+
+    /**
+     * Returns a manual testing tip tailored to the given accessibility rule.
+     */
+    private static String getManualTestTip(String ruleName) {
+        if (ruleName == null) return "Use the axe DevTools browser extension to inspect this element.";
+        return switch (ruleName.toLowerCase()) {
+            case "color-contrast", "color-contrast-enhanced" ->
+                "Use Chrome DevTools > Accessibility panel or the Colour Contrast Analyser tool.";
+            case "keyboard", "focus-order-semantics", "scrollable-region-focusable", "frame-focusable-content" ->
+                "Tab through the page using only the keyboard and verify all interactive elements are reachable.";
+            case "focus-visible" ->
+                "Navigate using Tab key and confirm a visible focus indicator appears on every element.";
+            case "image-alt" ->
+                "Inspect the element in Chrome DevTools > Accessibility panel; verify alt text is descriptive.";
+            case "document-title" ->
+                "Check the <title> tag in page source; it should uniquely describe the page content.";
+            case "html-has-lang", "html-lang-valid" ->
+                "Check the lang attribute on the <html> element in page source (e.g. lang='en').";
+            case "heading-order" ->
+                "Use the axe DevTools extension or WAVE tool to visualize the heading structure.";
+            case "label", "label-content-name-mismatch" ->
+                "Navigate to the form field using Tab; verify your screen reader announces a meaningful label.";
+            case "link-name" ->
+                "Enable NVDA or VoiceOver and tab to this link — it should read a meaningful destination.";
+            default ->
+                "Use the axe DevTools browser extension or NVDA/VoiceOver with Chrome to verify.";
+        };
+    }
+
+    /**
+     * Formats a WCAG tag (e.g. "wcag143") as a success criterion number (e.g. "1.4.3").
+     */
+    private static String formatWcagTag(String tag) {
+        if (tag == null || !tag.startsWith("wcag")) return tag != null ? tag : "";
+        String digits = tag.substring(4);
+        if (digits.length() == 3) {
+            return digits.charAt(0) + "." + digits.charAt(1) + "." + digits.charAt(2);
+        } else if (digits.length() == 4) {
+            return digits.charAt(0) + "." + digits.charAt(1) + "." + digits.substring(2);
+        }
+        return digits;
+    }
+
+    /**
+     * Builds a WCAG 2.1 quickref URL for the given tag (e.g. "wcag143" → SC 1.4.3 filter).
+     */
+    private static String buildWcagUrl(String tag) {
+        if (tag == null || !tag.startsWith("wcag")) return "https://www.w3.org/WAI/WCAG21/quickref/";
+        String digits = tag.substring(4);
+        return "https://www.w3.org/WAI/WCAG21/quickref/?versions=2.1&showtechniques=" + digits;
     }
 
     // ==================== HELPER METHODS ====================

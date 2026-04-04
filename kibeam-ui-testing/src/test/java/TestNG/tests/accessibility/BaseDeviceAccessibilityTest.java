@@ -274,7 +274,7 @@ public abstract class BaseDeviceAccessibilityTest extends BaseAccessibilityTest 
             test.info(contextInfo);
 
             // Pass WebDriver for element screenshots on failures - uses enhanced format
-            AccessibilityReporter.attachCombinedReport(test, result.axeViolations, result.customIssues, getDriver());
+            AccessibilityReporter.attachCombinedReport(test, result.axeViolations, result.customIssues);
         } catch (Exception e) {
             log.error("Failed to attach report for {} on {}: {}", result.pageName, device.name(), e.getMessage());
             test.warning("Report attachment failed: " + e.getMessage());
@@ -302,9 +302,8 @@ public abstract class BaseDeviceAccessibilityTest extends BaseAccessibilityTest 
             for (PageResult page : result.pages.values()) {
                 try {
                     var node = test.createNode("📄 " + page.pageName + " Page");
-                    // Pass WebDriver for element screenshots on failures - uses enhanced format
                     AccessibilityReporter.attachCombinedReport(
-                            node, page.axeViolations, page.customIssues, getDriver());
+                            node, page.axeViolations, page.customIssues);
                 } catch (Exception e) {
                     log.error("Failed to attach report for page {}: {}", page.pageName, e.getMessage());
                 }
