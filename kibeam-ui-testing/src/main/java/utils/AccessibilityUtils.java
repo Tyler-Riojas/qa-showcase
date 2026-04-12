@@ -12,10 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Utility class for accessibility testing using Axe-core.
@@ -491,6 +489,8 @@ public final class AccessibilityUtils {
      * from finding accessibility violations - it means the scan itself failed.</p>
      */
     public static class AccessibilityScanException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
 
         /**
          * Creates a new accessibility scan exception.

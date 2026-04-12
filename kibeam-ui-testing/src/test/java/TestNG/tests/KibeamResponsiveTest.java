@@ -275,7 +275,6 @@ public class KibeamResponsiveTest extends BaseTestTestNG {
                     overflowCount++;
                     String src = img.getAttribute("src");
                     String alt = img.getAttribute("alt");
-                    int imgHeight = img.getSize().getHeight();
                     int overflowBy = (imgX + imgWidth) - viewportWidth;
 
                     // Trim src to filename only for readability

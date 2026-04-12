@@ -518,6 +518,9 @@ public class Configuration {
      * Custom exception for configuration errors
      */
     public static class ConfigurationException extends RuntimeException {
+
+        private static final long serialVersionUID = 1L;
+
         public ConfigurationException(String message) {
             super(message);
         }

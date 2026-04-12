@@ -285,7 +285,6 @@ public final class AccessibilityReporter {
 
         // Log summary and apply report cap before building any HTML
         int totalViolations = violations != null ? violations.size() : 0;
-        int totalIssues = issues != null ? issues.size() : 0;
         log.info("Accessibility report: {} violations found, showing top {} in report, full list in console",
                 totalViolations, Math.min(totalViolations, MAX_VIOLATIONS_IN_REPORT));
 
@@ -472,7 +471,6 @@ public final class AccessibilityReporter {
         final List<String> selectors;
         final List<String> tags;
         final int nodeCount;
-        final boolean isAxe;
 
         ViolationEntry(AccessibilityViolation v) {
             this.severity = v.getImpact() != null ? v.getImpact().toLowerCase() : "unknown";
@@ -483,7 +481,6 @@ public final class AccessibilityReporter {
             this.selectors = v.getElementSelectors();
             this.tags = v.getTags();
             this.nodeCount = v.getNodeCount();
-            this.isAxe = true;
         }
 
         ViolationEntry(AccessibilityIssue i) {
@@ -496,7 +493,6 @@ public final class AccessibilityReporter {
                     List.of(i.getElementSelector()) : List.of();
             this.tags = List.of();
             this.nodeCount = 1;
-            this.isAxe = false;
         }
 
         int getSeverityOrder() {
@@ -508,25 +504,6 @@ public final class AccessibilityReporter {
                 default -> 4;
             };
         }
-    }
-
-    /**
-     * Combine Axe violations and custom issues, sort by severity.
-     */
-    private static List<ViolationEntry> combineAndSortBySeverity(
-            List<AccessibilityViolation> violations, List<AccessibilityIssue> issues) {
-
-        List<ViolationEntry> entries = new java.util.ArrayList<>();
-
-        if (violations != null) {
-            violations.forEach(v -> entries.add(new ViolationEntry(v)));
-        }
-        if (issues != null) {
-            issues.forEach(i -> entries.add(new ViolationEntry(i)));
-        }
-
-        entries.sort(java.util.Comparator.comparingInt(ViolationEntry::getSeverityOrder));
-        return entries;
     }
 
     /**
@@ -643,7 +620,6 @@ public final class AccessibilityReporter {
             return "";
         }
 
-        String uniqueId = "section_" + System.nanoTime() + "_" + title.hashCode();
         String openAttr = expandedByDefault ? " open" : "";
 
         StringBuilder html = new StringBuilder();
@@ -1222,67 +1198,6 @@ public final class AccessibilityReporter {
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;");
-    }
-
-    /**
-     * Generates summary table data for Axe violations.
-     */
-    private static String[][] generateAxeSummaryTable(List<AccessibilityViolation> violations) {
-        Map<String, Long> byImpact = violations.stream()
-                .collect(Collectors.groupingBy(
-                        v -> v.getImpact() != null ? v.getImpact() : "unknown",
-                        Collectors.counting()));
-
-        return new String[][]{
-                {"Impact Level", "Count"},
-                {"Critical", String.valueOf(byImpact.getOrDefault("critical", 0L))},
-                {"Serious", String.valueOf(byImpact.getOrDefault("serious", 0L))},
-                {"Moderate", String.valueOf(byImpact.getOrDefault("moderate", 0L))},
-                {"Minor", String.valueOf(byImpact.getOrDefault("minor", 0L))},
-                {"Total", String.valueOf(violations.size())}
-        };
-    }
-
-    /**
-     * Generates summary table data for custom issues.
-     */
-    private static String[][] generateCustomSummaryTable(List<AccessibilityIssue> issues) {
-        Map<Severity, Long> bySeverity = issues.stream()
-                .collect(Collectors.groupingBy(AccessibilityIssue::getSeverity, Collectors.counting()));
-
-        return new String[][]{
-                {"Severity", "Count"},
-                {"Critical", String.valueOf(bySeverity.getOrDefault(Severity.CRITICAL, 0L))},
-                {"Moderate", String.valueOf(bySeverity.getOrDefault(Severity.MODERATE, 0L))},
-                {"Minor", String.valueOf(bySeverity.getOrDefault(Severity.MINOR, 0L))},
-                {"Total", String.valueOf(issues.size())}
-        };
-    }
-
-    /**
-     * Generates combined summary markup for ExtentReports.
-     */
-    private static String generateCombinedSummaryMarkup(List<AccessibilityViolation> violations,
-                                                         List<AccessibilityIssue> issues) {
-        int axeCount = violations != null ? violations.size() : 0;
-        int customCount = issues != null ? issues.size() : 0;
-
-        StringBuilder html = new StringBuilder();
-        html.append("<div style='padding: 10px; background: #f5f5f5; border-radius: 5px;'>");
-        html.append("<h4 style='margin: 0 0 10px 0;'>Accessibility Summary</h4>");
-        html.append("<table style='width: 100%;'>");
-        html.append("<tr><td><strong>Axe-core Violations:</strong></td><td>").append(axeCount).append("</td></tr>");
-        html.append("<tr><td><strong>Custom Checker Issues:</strong></td><td>").append(customCount).append("</td></tr>");
-        html.append("<tr style='border-top: 1px solid #ccc;'><td><strong>Total:</strong></td><td><strong>")
-                .append(axeCount + customCount).append("</strong></td></tr>");
-        html.append("</table>");
-
-        if (axeCount == 0 && customCount == 0) {
-            html.append("<p style='color: green; margin: 10px 0 0 0;'>✓ Page passed all accessibility checks!</p>");
-        }
-
-        html.append("</div>");
-        return html.toString();
     }
 
     // ==================== STATISTICS CLASS ====================

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import org.testng.asserts.SoftAssert;
 import utils.AccessibilityChecker;
 import utils.AccessibilityChecker.AccessibilityIssue;
 import utils.AccessibilityChecker.Severity;
@@ -446,24 +445,18 @@ public class KibeamDeviceAccessibilityTest extends BaseAccessibilityTest {
      * Result container for a single page scan.
      */
     private static class PageAccessibilityResult {
-        final String url;
         final List<AccessibilityViolation> axeViolations;
         final List<AccessibilityIssue> customIssues;
 
         PageAccessibilityResult(String url,
                                 List<AccessibilityViolation> axeViolations,
                                 List<AccessibilityIssue> customIssues) {
-            this.url = url;
             this.axeViolations = axeViolations != null ? axeViolations : List.of();
             this.customIssues = customIssues != null ? customIssues : List.of();
         }
 
         boolean hasViolations() {
             return !axeViolations.isEmpty() || !customIssues.isEmpty();
-        }
-
-        int getTotalCount() {
-            return axeViolations.size() + customIssues.size();
         }
     }
 

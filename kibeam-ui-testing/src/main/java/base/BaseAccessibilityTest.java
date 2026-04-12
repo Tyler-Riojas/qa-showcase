@@ -528,6 +528,8 @@ public class BaseAccessibilityTest extends BaseTestTestNG {
      */
     public static class AccessibilityAssertionError extends AssertionError {
 
+        private static final long serialVersionUID = 1L;
+
         /**
          * Creates a new accessibility assertion error.
          *
