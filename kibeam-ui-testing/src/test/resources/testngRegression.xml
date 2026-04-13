@@ -5,6 +5,7 @@
         <listener class-name="listeners.AnnotationTransformer"/>
         <listener class-name="listeners.TestListenerTestNG"/>
         <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
     </listeners>
     
     <test name="Regression Tests - Chrome">

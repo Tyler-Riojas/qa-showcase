@@ -27,6 +27,7 @@
         <extentreports.version>5.1.2</extentreports.version>
         <allure.version>2.32.0</allure.version>
         <allure-maven.version>2.17.0</allure-maven.version>
+        <aspectjweaver.version>1.9.22</aspectjweaver.version>
 
         <!-- Build -->
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
@@ -108,14 +109,19 @@
             <version>${extentreports.version}</version>
         </dependency>
 
-        <!-- Allure TestNG Integration (Optional - uncomment if using Allure) -->
-        <!--
+        <!-- Allure TestNG Integration -->
         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-testng</artifactId>
             <version>${allure.version}</version>
+            <scope>test</scope>
         </dependency>
-        -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectjweaver.version}</version>
+            <scope>test</scope>
+        </dependency>
 
          <!-- ========== Axe Core for accessibility ========== -->
         <dependency>
@@ -141,7 +147,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
-                    <argLine>-Xms512m -Xmx4096m</argLine>
+                    <argLine>-javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectjweaver.version}/aspectjweaver-${aspectjweaver.version}.jar -Xms512m -Xmx4096m</argLine>
                     <suiteXmlFiles>
                         <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
                     </suiteXmlFiles>
@@ -161,8 +167,35 @@
                 </configuration>
             </plugin>
 
-            <!-- ========== ALLURE MAVEN PLUGIN (Optional - uncomment if using Allure) ========== -->
-            <!--
+            <!-- ========== ALLURE ENVIRONMENT PROPERTIES ========== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-allure-environment</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/allure-results</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/test/resources</directory>
+                                    <includes>
+                                        <include>environment.properties</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ========== ALLURE MAVEN PLUGIN ========== -->
             <plugin>
                 <groupId>io.qameta.allure</groupId>
                 <artifactId>allure-maven</artifactId>
@@ -171,7 +204,6 @@
                     <reportVersion>${allure.version}</reportVersion>
                 </configuration>
             </plugin>
-            -->
         </plugins>
     </build>
 
