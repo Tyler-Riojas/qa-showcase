@@ -27,7 +27,7 @@
         <extentreports.version>5.1.2</extentreports.version>
         <allure.version>2.32.0</allure.version>
         <allure-maven.version>2.17.0</allure-maven.version>
-        <aspectjweaver.version>1.9.22</aspectjweaver.version>
+        <aspectjweaver.version>1.9.24</aspectjweaver.version>
 
         <!-- Build -->
         <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>

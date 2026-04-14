@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Load Tests" verbose="1">
+
+    <!--
+        API Load Test Suite
+        ===================
+        Runs JMeter DSL and K6 load tests against the Restful Booker API.
+
+        Prerequisites:
+            docker run -d -p 3001:3001 mwinteringham/restfulbooker
+            brew install k6  (for K6 tests)
+
+        Usage:
+            mvn test -Pload-tests
+            mvn test -Pload-tests -Dapi.base.url=https://restful-booker.herokuapp.com
+    -->
+
+    <listeners>
+        <listener class-name="listeners.AnnotationTransformer"/>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="API Load Tests">
+        <classes>
+            <class name="TestNG.tests.performance.ApiLoadTest"/>
+        </classes>
+    </test>
+
+</suite>

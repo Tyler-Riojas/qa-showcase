@@ -27,3 +27,10 @@ replay_pid*
 Extensions/
 selenium-extension/
 docs/extension-testing.md
+performance-testing/target/
+performance-testing/reports/
+performance-testing/screenshots/
+performance-testing/reports/har/
+accessibility-testing/target/
+accessibility-testing/reports/
+accessibility-testing/screenshots/

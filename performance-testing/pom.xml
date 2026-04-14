@@ -1,0 +1,786 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.portfolio</groupId>
+    <artifactId>performance-testing</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>Performance Testing Showcase</name>
+
+    <properties>
+        <!-- Logging -->
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.23</logback.version>
+
+        <!-- Core Testing -->
+        <selenium.version>4.39.0</selenium.version>
+        <testng.version>7.11.0</testng.version>
+        <wdm.version>6.3.3</wdm.version>
+
+        <!-- Utilities -->
+        <assertj.version>3.27.6</assertj.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <datafaker.version>2.5.3</datafaker.version>
+
+        <!-- API Testing -->
+        <restassured.version>6.0.0</restassured.version>
+        <jackson.version>2.18.3</jackson.version>
+
+        <!-- Performance Testing -->
+        <jmeter-dsl.version>1.29.1</jmeter-dsl.version>
+        <gatling.version>3.11.5</gatling.version>
+        <browsermob.version>2.1.5</browsermob.version>
+
+        <!-- Reporting -->
+        <extentreports.version>5.1.2</extentreports.version>
+        <allure.version>2.32.0</allure.version>
+        <allure-maven.version>2.17.0</allure-maven.version>
+        <aspectjweaver.version>1.9.24</aspectjweaver.version>
+
+        <!-- Build -->
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- Encoding -->
+        <project.encoding>UTF-8</project.encoding>
+        <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
+
+        <!-- Default TestNG suite -->
+        <suiteXmlFile>src/test/resources/testng-performance-smoke.xml</suiteXmlFile>
+
+        <!-- Default headless mode (false for local, set to true for CI) -->
+        <headless>false</headless>
+
+        <!-- Default target URL for Allure environment report -->
+        <target.url>https://the-internet.herokuapp.com</target.url>
+    </properties>
+
+    <dependencies>
+        <!-- ========== LOGGING ========== -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+        <!-- ========== SELENIUM ========== -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- ========== WEBDRIVER MANAGER ========== -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${wdm.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- ========== TESTNG ========== -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+        </dependency>
+
+        <!-- ========== ASSERTIONS ========== -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+        </dependency>
+
+        <!-- ========== UTILITIES ========== -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
+        </dependency>
+
+        <!-- ========== REPORTING ========== -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extentreports.version}</version>
+        </dependency>
+
+        <!-- Allure TestNG Integration -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+        </dependency>
+
+        <!-- AspectJ Weaver - required for Allure @Step/@Attachment bytecode instrumentation -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectjweaver.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- ========== ACCESSIBILITY TESTING ========== -->
+        <dependency>
+            <groupId>com.deque.html.axe-core</groupId>
+            <artifactId>selenium</artifactId>
+            <version>4.11.0</version>
+        </dependency>
+
+        <!-- ========== API TESTING ========== -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>${restassured.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${restassured.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- ========== PERFORMANCE TESTING ========== -->
+        <!-- JMeter Java DSL - Programmatic load testing -->
+        <dependency>
+            <groupId>us.abstracta.jmeter</groupId>
+            <artifactId>jmeter-java-dsl</artifactId>
+            <version>${jmeter-dsl.version}</version>
+            <exclusions>
+                <!-- Exclude old Groovy 3.x to avoid conflict with RestAssured's Groovy 5.x -->
+                <exclusion>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Gatling - High-performance load testing -->
+        <dependency>
+            <groupId>io.gatling.highcharts</groupId>
+            <artifactId>gatling-charts-highcharts</artifactId>
+            <version>${gatling.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- BrowserMob Proxy - Network capture and throttling -->
+        <dependency>
+            <groupId>net.lightbody.bmp</groupId>
+            <artifactId>browsermob-core</artifactId>
+            <version>${browsermob.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-jdk14</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- ========== SUREFIRE PLUGIN ========== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-testng</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <argLine>-javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectjweaver.version}/aspectjweaver-${aspectjweaver.version}.jar</argLine>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <properties>
+                        <property>
+                            <name>junit</name>
+                            <value>false</value>
+                        </property>
+                    </properties>
+                    <threadCount>4</threadCount>
+                    <!-- Pass Maven properties to JVM for report naming -->
+                    <systemPropertyVariables>
+                        <test>${test}</test>
+                        <device>${device}</device>
+                        <headless>${headless}</headless>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- ========== ALLURE ENVIRONMENT PROPERTIES ========== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-allure-environment</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/allure-results</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/test/resources</directory>
+                                    <includes>
+                                        <include>environment.properties</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ========== ALLURE MAVEN PLUGIN ========== -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>${allure-maven.version}</version>
+                <configuration>
+                    <reportVersion>${allure.version}</reportVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- ========== PROFILES FOR DIFFERENT TEST SUITES ========== -->
+    <profiles>
+        <!-- Run all browsers in parallel -->
+        <profile>
+            <id>all-browsers</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngTestAllBrowsers.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run Chrome only (default behavior without profile) -->
+        <profile>
+            <id>chrome</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngChrome.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run smoke tests -->
+        <profile>
+            <id>smoke</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-smoke.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run regression tests -->
+        <profile>
+            <id>regression</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngRegression.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run API tests -->
+        <profile>
+            <id>api</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngApi.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Run API CRUD tests -->
+        <profile>
+            <id>crud</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngCrud.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- ==================== DEVICE PROFILES ==================== -->
+        <!-- All pages on MOBILE devices -->
+        <profile>
+            <id>mobile</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Mobile_Tests</reportName>
+                                <reportTitle>Accessibility Mobile Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>5</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- All pages on TABLET devices -->
+        <profile>
+            <id>tablet</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>tablet</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Tablet_Tests</reportName>
+                                <reportTitle>Accessibility Tablet Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>4</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- All pages on DESKTOP viewports -->
+        <profile>
+            <id>desktop</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>desktop</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>4</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_Desktop_Tests</reportName>
+                                <reportTitle>Accessibility Desktop Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>3</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- All pages on ALL devices (mobile + tablet + desktop) -->
+        <profile>
+            <id>all-devices</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <suiteXmlFiles combine.self="override"/>
+                            <groups>mobile,tablet,desktop</groups>
+                            <includes>
+                                <include>**/accessibility/*Test.java</include>
+                            </includes>
+                            <parallel>methods</parallel>
+                            <threadCount>6</threadCount>
+                            <systemPropertyVariables>
+                                <reportName>Accessibility_All_Devices_Tests</reportName>
+                                <reportTitle>Accessibility All Devices Test Report</reportTitle>
+                            </systemPropertyVariables>
+                            <properties>
+                                <property>
+                                    <name>listener</name>
+                                    <value>listeners.ExtentTestNGListener,listeners.AnnotationTransformer</value>
+                                </property>
+                                <property>
+                                    <name>dataproviderthreadcount</name>
+                                    <value>6</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ========== ENVIRONMENT PROFILES ========== -->
+        <!-- Development environment -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <env>dev</env>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Staging environment -->
+        <profile>
+            <id>staging</id>
+            <properties>
+                <env>staging</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <env>staging</env>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Production environment -->
+        <profile>
+            <id>prod</id>
+            <properties>
+                <env>prod</env>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <env>prod</env>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ========== PERFORMANCE TEST PROFILES ========== -->
+
+        <!-- All Performance Tests -->
+        <profile>
+            <id>performance</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngPerformance.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <reportName>Performance_Tests</reportName>
+                                <reportTitle>Performance Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- API Load Tests (JMeter DSL / k6) -->
+        <profile>
+            <id>load</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngLoadTest.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <reportName>Load_Tests</reportName>
+                                <reportTitle>API Load Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Load tests against local Docker container (controlled environment, real assertions) -->
+        <profile>
+            <id>load-local</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngLoadTest.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <api.base.url>http://localhost:3001</api.base.url>
+                                <reportName>Load_Tests_Local</reportName>
+                                <reportTitle>API Load Test Report — Local Docker</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Load tests against shared Heroku instance (demonstrates environment noise) -->
+        <profile>
+            <id>load-heroku</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngLoadTest.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <api.base.url>https://restful-booker.herokuapp.com</api.base.url>
+                                <reportName>Load_Tests_Heroku</reportName>
+                                <reportTitle>API Load Test Report — Heroku (shared)</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- k6-only Tests (requires k6 CLI: brew install k6) -->
+        <profile>
+            <id>k6</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngK6.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <reportName>K6_Tests</reportName>
+                                <reportTitle>K6 Load Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- UI Performance Tests -->
+        <profile>
+            <id>ui-performance</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngUIPerformance.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <reportName>UI_Performance_Tests</reportName>
+                                <reportTitle>UI Performance Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Network Performance Tests (BrowserMob Proxy) -->
+        <profile>
+            <id>network</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngNetworkPerformance.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <reportName>Network_Performance_Tests</reportName>
+                                <reportTitle>Network Performance Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Device Performance Tests -->
+        <profile>
+            <id>device</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testngDevicePerformance.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <reportName>Device_Performance_Tests</reportName>
+                                <reportTitle>Device Performance Test Report</reportTitle>
+                                <headless>true</headless>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Run against any site: mvn test -Presponsive -Dtarget.url=https://example.com -->
+        <profile>
+            <id>responsive</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-responsive.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <target.url>${target.url}</target.url>
+                                <target.pages>${target.pages}</target.pages>
+                                <reportName>Responsive_Tests</reportName>
+                                <reportTitle>Responsive Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- ========== PERFORMANCE TESTING SHOWCASE PROFILES ========== -->
+
+        <!-- Performance Smoke — UI + Network (no Docker required) -->
+        <profile>
+            <id>performance-smoke</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-performance-smoke.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Full Load Tests (requires Docker: docker run -d -p 3001:3001 mwinteringham/restfulbooker) -->
+        <profile>
+            <id>load-tests</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-load-tests.xml</suiteXmlFile>
+            </properties>
+        </profile>
+
+        <!-- Device Performance — 11 device/network profiles via Chrome DevTools Protocol -->
+        <profile>
+            <id>device-performance</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-device-performance.xml</suiteXmlFile>
+            </properties>
+        </profile>
+    </profiles>
+</project>
