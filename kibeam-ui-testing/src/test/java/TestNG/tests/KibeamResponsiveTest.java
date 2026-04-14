@@ -260,7 +260,7 @@ public class KibeamResponsiveTest extends BaseTestTestNG {
     // Untitled_design_20.png overflows tablet viewport by 90px
     // Root cause: image uploaded via Shopify CMS without max-width: 100% CSS
     // Do not suppress this failure — it is the test doing its job correctly
-    @Test(description = "Verify images don't overflow container", priority = 2, retryAnalyzer = null)
+    @Test(description = "Verify images don't overflow container", priority = 2)
     public void testImagesResponsive() {
         SoftAssert softAssert = new SoftAssert();
         log.info("Testing image responsiveness");
