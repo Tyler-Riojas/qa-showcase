@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Extension Popup Tests" parallel="none" verbose="1">
+
+    <!--
+        Extension Popup UI Test Suite
+        ================================
+        Navigates to the chrome-extension:// popup URL and validates UI elements.
+
+        Usage:
+            mvn test -Pextension-popup
+    -->
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="Popup UI Tests">
+        <classes>
+            <class name="TestNG.tests.PopupUITest"/>
+        </classes>
+    </test>
+
+</suite>

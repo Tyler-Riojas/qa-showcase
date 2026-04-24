@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Chrome Extension Tests" parallel="methods" thread-count="1" verbose="1">
+
+    <!--
+        Full Chrome Extension Test Suite
+        ==================================
+        Runs all extension test classes against a real Chrome instance.
+
+        thread-count=1 — extensions require a single shared browser session.
+        The extension ID is discovered once at @BeforeSuite and reused by all tests.
+
+        Usage:
+            mvn test
+            mvn test -Pextension-full
+    -->
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="Extension Load Tests">
+        <classes>
+            <class name="TestNG.tests.ExtensionLoadTest"/>
+        </classes>
+    </test>
+
+    <test name="Popup UI Tests">
+        <classes>
+            <class name="TestNG.tests.PopupUITest"/>
+        </classes>
+    </test>
+
+    <test name="Content Script Tests">
+        <classes>
+            <class name="TestNG.tests.ContentScriptTest"/>
+        </classes>
+    </test>
+
+    <test name="Manifest Validation Tests">
+        <classes>
+            <class name="TestNG.tests.ManifestTest"/>
+        </classes>
+    </test>
+
+</suite>

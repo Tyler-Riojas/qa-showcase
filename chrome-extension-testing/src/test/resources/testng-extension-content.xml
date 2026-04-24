@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Extension Content Script Tests" parallel="none" verbose="1">
+
+    <!--
+        Extension Content Script Test Suite
+        ======================================
+        Navigates to real websites and verifies the banner is injected correctly.
+
+        Usage:
+            mvn test -Pextension-content
+    -->
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="Content Script Tests">
+        <classes>
+            <class name="TestNG.tests.ContentScriptTest"/>
+        </classes>
+    </test>
+
+</suite>

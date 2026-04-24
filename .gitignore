@@ -34,3 +34,6 @@ performance-testing/reports/har/
 accessibility-testing/target/
 accessibility-testing/reports/
 accessibility-testing/screenshots/
+chrome-extension-testing/target/
+chrome-extension-testing/reports/
+chrome-extension-testing/screenshots/

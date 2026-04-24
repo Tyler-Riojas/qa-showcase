@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Extension Smoke Tests" parallel="none" verbose="1">
+
+    <!--
+        Extension Smoke Test Suite
+        ============================
+        Fast validation — runs only ExtensionLoadTest and ManifestTest.
+        ManifestTest requires no browser interaction (JSON file only).
+
+        Usage:
+            mvn test -Pextension-smoke
+    -->
+
+    <listeners>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="Extension Load Tests">
+        <classes>
+            <class name="TestNG.tests.ExtensionLoadTest"/>
+        </classes>
+    </test>
+
+    <test name="Manifest Validation Tests">
+        <classes>
+            <class name="TestNG.tests.ManifestTest"/>
+        </classes>
+    </test>
+
+</suite>
