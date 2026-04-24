@@ -1,6 +1,6 @@
 # QA Testing Portfolio
 
-A collection of automated tests demonstrating API testing and Chrome Extension testing.
+A collection of automated tests demonstrating API testing, Performance Testing and Chrome Extension testing.
 
 ---
 
