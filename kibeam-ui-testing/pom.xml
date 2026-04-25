@@ -229,7 +229,7 @@
         <profile>
             <id>smoke</id>
             <properties>
-                <suiteXmlFile>src/test/resources/testngSmoke.xml</suiteXmlFile>
+                <suiteXmlFile>src/test/resources/testngKibeam.xml</suiteXmlFile>
             </properties>
         </profile>
 
