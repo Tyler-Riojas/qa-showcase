@@ -1,0 +1,64 @@
+# Chrome Extension Tests
+#
+# This workflow runs Chrome extension tests using Chrome for Testing.
+# Chrome for Testing (~169MB) is downloaded automatically on first run.
+# Run manually via: Actions tab -> Chrome Extension Tests -> Run workflow
+
+name: Chrome Extension Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # CHROME EXTENSION — manifest, load, popup UI, and content script tests
+  # macOS runner: Chrome for Testing downloads faster and has better Chrome
+  # compatibility on macOS than on Linux runners.
+  # ════════════════════════════════════════════════════════════════════════════
+  chrome-extension:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: chrome-extension-testing
+
+    steps:
+      # ── Checkout ────────────────────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── Java ────────────────────────────────────────────────────────────────
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # ── Smoke tests ─────────────────────────────────────────────────────────
+      - name: Run extension smoke tests
+        run: mvn test -Pextension-smoke --no-transfer-progress
+
+      # ── Full suite ──────────────────────────────────────────────────────────
+      - name: Run full extension suite
+        run: mvn test -Pextension-full --no-transfer-progress
+        continue-on-error: true
+
+      # ── Artifacts ───────────────────────────────────────────────────────────
+      - name: Upload test reports on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: extension-reports-${{ github.run_number }}
+          path: |
+            chrome-extension-testing/reports/*.html
+            chrome-extension-testing/screenshots/*.png
+          retention-days: 14
+
+      - name: Upload Allure results on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: extension-allure-${{ github.run_number }}
+          path: chrome-extension-testing/target/allure-results/
+          retention-days: 14
