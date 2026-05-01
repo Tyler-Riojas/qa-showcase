@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="OrangeHRM Smoke">
+
+    <listeners>
+        <listener class-name="listeners.AnnotationTransformer"/>
+        <listener class-name="listeners.TestListenerTestNG"/>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="OrangeHRM Smoke Tests">
+        <classes>
+            <class name="TestNG.tests.AddEmployeeTest">
+                <methods>
+                    <include name="testAddEmployee"/>
+                </methods>
+            </class>
+            <class name="TestNG.tests.UpdateMyInfoTest">
+                <methods>
+                    <include name="testUpdateNickname"/>
+                </methods>
+            </class>
+        </classes>
+    </test>
+
+</suite>

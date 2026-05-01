@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="OrangeHRM Full" parallel="classes" thread-count="2">
+
+    <listeners>
+        <listener class-name="listeners.AnnotationTransformer"/>
+        <listener class-name="listeners.TestListenerTestNG"/>
+        <listener class-name="listeners.ExtentTestNGListener"/>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+    </listeners>
+
+    <test name="OrangeHRM Full Tests">
+        <classes>
+            <class name="TestNG.tests.AddEmployeeTest"/>
+            <class name="TestNG.tests.UpdateMyInfoTest"/>
+            <class name="TestNG.tests.DeleteEmployeeTest"/>
+        </classes>
+    </test>
+
+</suite>

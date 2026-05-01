@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.portfolio</groupId>
+    <artifactId>orangehrm-testing</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>OrangeHRM Enterprise Testing</name>
+
+    <properties>
+        <!-- Logging -->
+        <slf4j.version>2.0.17</slf4j.version>
+        <logback.version>1.5.23</logback.version>
+
+        <!-- Core Testing -->
+        <selenium.version>4.39.0</selenium.version>
+        <testng.version>7.11.0</testng.version>
+        <wdm.version>6.3.3</wdm.version>
+
+        <!-- Utilities -->
+        <assertj.version>3.27.6</assertj.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <datafaker.version>2.5.3</datafaker.version>
+
+        <!-- Reporting -->
+        <extentreports.version>5.1.2</extentreports.version>
+        <allure.version>2.32.0</allure.version>
+        <allure-maven.version>2.17.0</allure-maven.version>
+        <aspectjweaver.version>1.9.24</aspectjweaver.version>
+
+        <!-- Build -->
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- Encoding -->
+        <project.encoding>UTF-8</project.encoding>
+        <project.build.sourceEncoding>${project.encoding}</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>${project.encoding}</project.reporting.outputEncoding>
+
+        <!-- Default suite -->
+        <suiteXmlFile>src/test/resources/testng-orangehrm-smoke.xml</suiteXmlFile>
+
+        <!-- Default headless mode -->
+        <headless>false</headless>
+    </properties>
+
+    <dependencies>
+        <!-- ========== LOGGING ========== -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+
+        <!-- ========== SELENIUM ========== -->
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+        </dependency>
+
+        <!-- ========== WEBDRIVER MANAGER ========== -->
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>${wdm.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- ========== TESTNG ========== -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+        </dependency>
+
+        <!-- ========== ASSERTIONS ========== -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+        </dependency>
+
+        <!-- ========== UTILITIES ========== -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
+        </dependency>
+
+        <!-- ========== REPORTING ========== -->
+        <dependency>
+            <groupId>com.aventstack</groupId>
+            <artifactId>extentreports</artifactId>
+            <version>${extentreports.version}</version>
+        </dependency>
+
+        <!-- Allure TestNG Integration -->
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-testng</artifactId>
+            <version>${allure.version}</version>
+        </dependency>
+
+        <!-- AspectJ Weaver - required for Allure @Step/@Attachment bytecode instrumentation -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>${aspectjweaver.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- ========== SUREFIRE PLUGIN ========== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.surefire</groupId>
+                        <artifactId>surefire-testng</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <argLine>-javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectjweaver.version}/aspectjweaver-${aspectjweaver.version}.jar -Xms256m -Xmx1024m</argLine>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </suiteXmlFiles>
+                    <properties>
+                        <property>
+                            <name>junit</name>
+                            <value>false</value>
+                        </property>
+                    </properties>
+                    <systemPropertyVariables>
+                        <headless>${headless}</headless>
+                        <suiteXmlFile>${suiteXmlFile}</suiteXmlFile>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <!-- ========== ALLURE ENVIRONMENT PROPERTIES ========== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <executions>
+                    <execution>
+                        <id>copy-allure-environment</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/allure-results</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/test/resources</directory>
+                                    <includes>
+                                        <include>environment.properties</include>
+                                    </includes>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- ========== ALLURE MAVEN PLUGIN ========== -->
+            <plugin>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-maven</artifactId>
+                <version>${allure-maven.version}</version>
+                <configuration>
+                    <reportVersion>${allure.version}</reportVersion>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <!-- ========== PROFILES ========== -->
+    <profiles>
+        <!-- Smoke — quick validation: Add employee + Update nickname -->
+        <profile>
+            <id>orangehrm-smoke</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-orangehrm-smoke.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <headless>${headless}</headless>
+                                <reportName>OrangeHRM_Smoke_Tests</reportName>
+                                <reportTitle>OrangeHRM Smoke Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Full — all 3 test classes, parallel=classes -->
+        <profile>
+            <id>orangehrm-full</id>
+            <properties>
+                <suiteXmlFile>src/test/resources/testng-orangehrm-full.xml</suiteXmlFile>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>${maven-surefire-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <headless>${headless}</headless>
+                                <reportName>OrangeHRM_Full_Tests</reportName>
+                                <reportTitle>OrangeHRM Full Test Report</reportTitle>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

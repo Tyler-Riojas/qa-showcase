@@ -40,3 +40,6 @@ chrome-extension-testing/screenshots/
 responsive-testing/target/
 responsive-testing/reports/
 responsive-testing/screenshots/
+orangehrm-testing/target/
+orangehrm-testing/reports/
+orangehrm-testing/screenshots/
