@@ -3,7 +3,7 @@
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Tyler%20Riojas-blue?logo=linkedin)](https://linkedin.com/in/tyler-riojas)
 [![GitHub](https://img.shields.io/badge/GitHub-Tyler--Riojas-black?logo=github)](https://github.com/Tyler-Riojas)
 
-Six projects covering API testing, multi-device UI automation, WCAG accessibility, performance metrics, and Chrome extension testing — 210 automated tests across Java + Selenium, RestAssured, JMeter, K6, and Postman.
+Eight projects covering API testing, multi-device UI automation, WCAG accessibility, performance metrics, Chrome extension testing, cross-device responsive layout, and enterprise HR application CRUD — 242 automated tests across Java + Selenium, RestAssured, JMeter, K6, and Postman.
 
 ---
 
@@ -17,6 +17,18 @@ Six projects covering API testing, multi-device UI automation, WCAG accessibilit
 | [accessibility-testing](#accessibility-testing--wcag-suite) | WCAG 2.1 AA — generic, any URL | 14 | Selenium 4, Axe-core, TestNG |
 | [performance-testing](#performance-testing--metrics--load) | UI timing, network capture, load testing | 41 | Selenium, BrowserMob, JMeter DSL, K6 |
 | [chrome-extension-testing](#chrome-extension-testing) | Browser extension — manifest to content script | 20 | Selenium 4, Chrome for Testing, TestNG |
+| [responsive-testing](#responsive-testing) | Cross-device responsive layout — any URL | 25 | Selenium 4, TestNG, CDP |
+| [orangehrm-testing](#orangehrm-testing) | Enterprise HR application CRUD | 7 | Selenium, POM, TestNG |
+
+---
+
+## Live Test Reports
+
+Allure reports are generated automatically on every CI run and published here:
+
+🔗 **[View Live Allure Report](https://tyler-riojas.github.io/qa-showcase/)**
+
+Updated on every push to main. Shows test results across all projects with trend history, feature grouping, and step-by-step execution detail.
 
 ---
 
@@ -223,6 +235,90 @@ allure serve target/allure-results    # Interactive Allure report
 
 ---
 
+## responsive-testing
+
+25 tests validating cross-device responsive layout against any publicly accessible website. Configurable target URL, configurable page list, three device profiles run in parallel — no site-specific code required.
+
+### What This Demonstrates
+
+| Skill | Implementation |
+|---|---|
+| CDP device emulation | Chrome DevTools Protocol emulation for Mobile (iPhone 12), Tablet (iPad Pro 11), Desktop — accurate viewport, user-agent, and touch events |
+| Configurable target | `System.getProperty("target.url")` with fallback default — swap sites with a single flag, no code changes |
+| Horizontal overflow detection | `scrollWidth > clientWidth` via JavaScript — catches layout breakage invisible to visual inspection |
+| Touch target validation | Iterates buttons and anchors, flags elements smaller than the 44px WCAG/Apple minimum |
+| Image overflow detection | `imgX + imgWidth > viewportWidth` — the same check that found the kibeam.com production defect |
+| Parallel device execution | TestNG `parallel="tests"` with `thread-count="3"` — all three device profiles run concurrently |
+| ThreadLocal driver safety | `BaseTestTestNG` stores driver in `ThreadLocal<WebDriver>` — zero state leakage between threads |
+
+### Run
+
+```bash
+cd responsive-testing
+
+mvn test -Presponsive                                              # Default target (the-internet.herokuapp.com)
+mvn test -Presponsive -Dtarget.url=https://yoursite.com           # Any site
+mvn test -Presponsive -Dtarget.pages='/,/about,/contact'          # Specific pages
+mvn test -Presponsive-mobile -Dtarget.url=https://yoursite.com    # Mobile only
+mvn test -Presponsive-desktop                                     # Desktop only
+mvn test -Presponsive -Dheadless=true                             # Headless (CI)
+```
+
+---
+
+## orangehrm-testing
+
+7 automated tests covering full CRUD operations against [OrangeHRM](https://opensource-demo.orangehrmlive.com) — a live enterprise HR management system used by real companies worldwide.
+
+### 🏢 OrangeHRM Enterprise Testing
+
+**What it tests:** Full CRUD operations against a live enterprise HR management system
+
+**Real world highlight:** OrangeHRM is used by real companies worldwide. Tests handle Vue.js dynamic rendering, AJAX navigation, toast notifications, modal confirmations, and shared demo data — the same challenges found in real enterprise automation projects.
+
+**Run it:**
+```bash
+cd orangehrm-testing
+mvn test -Porangehrm-smoke
+```
+
+**Key concepts:**
+- Page Object Model for complex multi-page workflows
+- Vue.js locator strategies (href-based vs text-based)
+- Dynamic URL handling after record creation
+- Timestamp-based unique test data to avoid conflicts on shared demo
+
+### What This Demonstrates
+
+| Skill | Implementation |
+|---|---|
+| Enterprise app automation | Tests against OrangeHRM — a live HR system with real authentication, session management, and AJAX navigation |
+| Vue.js locator strategies | href-based CSS selectors (`a[href*='/pim/viewPimModule']`) instead of brittle text-based XPaths that fail in headless Chrome |
+| Dynamic URL handling | `/pim/viewMyDetails` redirects to `/pim/viewPersonalDetails/empNumber/N` — URL fragment matching handles this transparently |
+| Toast notification handling | `waitForElementVisible` with short timeout on `.oxd-toast--success`; falls back to URL check |
+| Modal confirmation flow | Delete → confirm modal → verify row removed — three-step interaction with explicit waits at each step |
+| Shared demo isolation | Timestamp-suffixed names (`TF{epoch}`, `TL{epoch}`) prevent data conflicts on the shared public demo |
+
+### Test Coverage
+
+| Test Class | Tests | Coverage |
+|---|---|---|
+| AddEmployeeTest | 2 | Add employee via PIM, verify name appears in employee list |
+| UpdateMyInfoTest | 2 | Update "Other Id" field in Personal Details, verify success toast, assert fields editable |
+| DeleteEmployeeTest | 3 | Create employee, delete via trash icon + modal confirm, verify removed; cancel-delete flow |
+
+### Run
+
+```bash
+cd orangehrm-testing
+
+mvn test -Porangehrm-smoke    # Add + update tests (fastest, 2 tests)
+mvn test -Porangehrm-full     # All 7 tests in parallel
+mvn test -Dheadless=true      # Headless mode
+```
+
+---
+
 ## Real Findings
 
 These are actual defects caught by running these tests against live sites — not contrived failures against a purpose-built test app.
@@ -245,7 +341,7 @@ The test logs: `Image overflow: src=Untitled_design_20.png alt=(no alt) overflow
 | Tool | Version | Used In |
 |---|---|---|
 | Java | 17 | All Java projects |
-| Selenium WebDriver | 4.39 | selenium-extension, kibeam-ui-testing, accessibility-testing, performance-testing, chrome-extension-testing |
+| Selenium WebDriver | 4.39 | selenium-extension, kibeam-ui-testing, accessibility-testing, performance-testing, chrome-extension-testing, responsive-testing |
 | TestNG | 7.11 | All Java projects |
 | WebDriverManager | 6.3.3 | All Selenium projects |
 | Chrome for Testing | auto-downloaded | chrome-extension-testing |
