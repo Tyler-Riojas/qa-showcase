@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 import pages.AddEmployeePage;
 import pages.EmployeeListPage;
 
-import java.time.Instant;
+import java.util.UUID;
 
 import static java.lang.invoke.MethodHandles.lookup;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,13 +32,15 @@ public class AddEmployeeTest extends BaseOrangeHRMTest {
     /** Unique per-test-method to survive parallel class execution. */
     private String testFirstName;
     private String testLastName;
+    private String testEmployeeId;
 
     /** Runs after parent's @BeforeMethod setup() — driver and login are ready. */
     @BeforeMethod(alwaysRun = true)
     public void navigateToPim() {
-        long ts = Instant.now().getEpochSecond();
-        testFirstName = "TF" + ts;
-        testLastName  = "TL" + ts;
+        String uniqueId = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        testFirstName  = "Auto" + uniqueId;
+        testLastName   = "Test" + uniqueId;
+        testEmployeeId = uniqueId;
         dashboardPage.isLoaded();
         dashboardPage.navigateToPIM();
     }
@@ -53,6 +55,7 @@ public class AddEmployeeTest extends BaseOrangeHRMTest {
         listPage.clickAddEmployee();
         addPage.enterFirstName(testFirstName);
         addPage.enterLastName(testLastName);
+        addPage.enterEmployeeId(testEmployeeId);
         addPage.clickSave();
 
         boolean saved = addPage.isEmployeeSaved();
@@ -74,6 +77,7 @@ public class AddEmployeeTest extends BaseOrangeHRMTest {
         listPage.clickAddEmployee();
         addPage.enterFirstName(testFirstName);
         addPage.enterLastName(testLastName);
+        addPage.enterEmployeeId(testEmployeeId);
         addPage.clickSave();
         addPage.isEmployeeSaved(); // wait for navigation
 

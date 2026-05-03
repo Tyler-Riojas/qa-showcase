@@ -11,6 +11,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import pages.DashboardPage;
 import pages.LoginPage;
+import utils.ActiveDriverHolder;
 import utils.ScreenshotUtils;
 
 import java.time.Duration;
@@ -71,6 +72,7 @@ public class BaseOrangeHRMTest {
         }
 
         driver = new ChromeDriver(options);
+        ActiveDriverHolder.set(driver);
         driver.manage().window().maximize();
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
@@ -108,6 +110,7 @@ public class BaseOrangeHRMTest {
                 log.warn("Exception quitting driver: {}", e.getMessage());
             } finally {
                 driver = null;
+                ActiveDriverHolder.remove();
             }
         }
     }

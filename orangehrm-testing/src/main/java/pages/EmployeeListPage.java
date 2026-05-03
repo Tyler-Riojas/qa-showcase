@@ -43,16 +43,28 @@ public class EmployeeListPage {
     public void searchEmployee(String firstName, String lastName) {
         log.info("Searching for: {} {}", firstName, lastName);
         try {
-            // OrangeHRM uses an autocomplete widget for Employee Name — type the first name
-            // (or partial name) to trigger a hint list; then submit the form to filter results.
+            // OrangeHRM uses an autocomplete widget — type to trigger dropdown, then
+            // select the matching option before submitting, otherwise the filter is ignored.
             WebElement nameField = WaitUtils.waitForElementVisible(driver, employeeNameSearch, 8);
             nameField.clear();
             nameField.sendKeys(firstName);
+
+            By autocompleteOption = By.cssSelector(".oxd-autocomplete-option");
+            try {
+                WebElement option = WaitUtils.waitForElementVisible(driver, autocompleteOption, 5);
+                option.click();
+            } catch (Exception e) {
+                log.debug("No autocomplete option appeared — proceeding with search");
+            }
         } catch (Exception e) {
-            log.warn("Employee name search field not accessible: {}", e.getMessage());
+            log.warn("Search field not accessible: {}", e.getMessage());
         }
         WaitUtils.waitForElementClickable(driver, searchButton).click();
         WaitUtils.waitForPageLoad(driver);
+        // Brief wait for Vue to re-render results after the search
+        try { Thread.sleep(1500); } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /** Returns number of data rows (excludes header row). */

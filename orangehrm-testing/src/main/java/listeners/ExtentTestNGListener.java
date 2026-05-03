@@ -450,33 +450,66 @@ public class ExtentTestNGListener implements ITestListener, ISuiteListener {
     }
 
     /**
-     * Capture screenshot and attach to Extent Report
+     * Capture screenshot and attach to Extent Report.
+     *
+     * <p>Tries three sources in order:
+     * <ol>
+     *   <li>{@link BaseTestTestNG} — tests that use DriverFactory</li>
+     *   <li>{@link core.DriverFactory#hasDriver()} — standalone DriverFactory users</li>
+     *   <li>{@link utils.ActiveDriverHolder} — tests that manage their own driver
+     *       (e.g. BaseOrangeHRMTest)</li>
+     * </ol>
      */
     private void attachScreenshot(ITestResult result, ExtentTest test) {
         try {
-            Object testClass = result.getInstance();
-            if (testClass instanceof BaseTestTestNG) {
-                WebDriver driver = ((BaseTestTestNG) testClass).getDriver();
-                if (driver != null) {
-                    String base64Screenshot = ScreenshotUtils.captureScreenshotAsBase64(driver);
-                    if (base64Screenshot != null) {
-                        test.addScreenCaptureFromBase64String(base64Screenshot, "Failure Screenshot");
-                        log.info("Screenshot attached to report");
-                    }
+            WebDriver driver = resolveDriver(result);
+            if (driver == null) {
+                log.warn("No active driver found for screenshot capture");
+                return;
+            }
 
-                    String screenshotPath = ScreenshotUtils.captureScreenshot(
-                        driver,
-                        result.getMethod().getMethodName() + "_FAILED"
-                    );
-                    if (screenshotPath != null) {
-                        log.info("Screenshot saved: " + screenshotPath);
-                    }
-                }
+            String base64Screenshot = ScreenshotUtils.captureScreenshotAsBase64(driver);
+            if (base64Screenshot != null) {
+                test.addScreenCaptureFromBase64String(base64Screenshot, "Failure Screenshot");
+                log.info("Screenshot attached to report");
+            }
+
+            String screenshotPath = ScreenshotUtils.captureScreenshot(
+                    driver,
+                    result.getMethod().getMethodName() + "_FAILED"
+            );
+            if (screenshotPath != null) {
+                log.info("Screenshot saved: " + screenshotPath);
             }
         } catch (Exception e) {
             log.error("Failed to capture screenshot: " + e.getMessage());
             test.warning("Could not capture screenshot: " + e.getMessage());
         }
+    }
+
+    /** Resolve the active WebDriver from whichever source owns it for this test. */
+    private WebDriver resolveDriver(ITestResult result) {
+        // 1. BaseTestTestNG — DriverFactory-backed tests
+        Object testInstance = result.getInstance();
+        if (testInstance instanceof BaseTestTestNG) {
+            WebDriver d = ((BaseTestTestNG) testInstance).getDriver();
+            if (d != null) {
+                log.debug("Got driver from BaseTestTestNG");
+                return d;
+            }
+        }
+        // 2. DriverFactory ThreadLocal — only if a driver is already live (don't create one)
+        if (core.DriverFactory.hasDriver()) {
+            log.debug("Got driver from DriverFactory");
+            return core.DriverFactory.getDriver();
+        }
+        // 3. ActiveDriverHolder — BaseOrangeHRMTest and similar self-managed drivers
+        WebDriver d = utils.ActiveDriverHolder.get();
+        if (d != null) {
+            log.debug("Got driver from ActiveDriverHolder");
+            return d;
+        }
+        return null;
     }
 
     /**

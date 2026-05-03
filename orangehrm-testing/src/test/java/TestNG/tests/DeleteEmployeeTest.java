@@ -15,8 +15,8 @@ import pages.AddEmployeePage;
 import pages.EmployeeListPage;
 import utils.WaitUtils;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.invoke.MethodHandles.lookup;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,11 +33,13 @@ public class DeleteEmployeeTest extends BaseOrangeHRMTest {
     private static final Logger log = LoggerFactory.getLogger(lookup().lookupClass());
 
     private static final By DELETE_BUTTONS      = By.cssSelector(".bi-trash");
-    private static final By CANCEL_DELETE_BTN   = By.cssSelector(".oxd-button--ghost");
-    private static final By CONFIRM_DELETE_BTN  = By.cssSelector(".oxd-button--label-danger");
+    // Cancel is the first button in the modal footer; .oxd-button--ghost is unreliable
+    private static final By CANCEL_DELETE_BTN   = By.cssSelector(".orangehrm-modal-footer button:first-child");
+    private static final By CONFIRM_DELETE_BTN  = By.cssSelector(".orangehrm-modal-footer .oxd-button--label-danger");
 
     private String createdFirstName;
     private String createdLastName;
+    private String createdEmployeeId;
 
     /**
      * Creates a unique test employee before each test.
@@ -45,9 +47,10 @@ public class DeleteEmployeeTest extends BaseOrangeHRMTest {
      */
     @BeforeMethod(alwaysRun = true)
     public void createTestEmployee() {
-        long ts = Instant.now().getEpochSecond();
-        createdFirstName = "DF" + ts;
-        createdLastName  = "DL" + ts;
+        String uniqueId  = UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
+        createdFirstName  = "Auto" + uniqueId;
+        createdLastName   = "Test" + uniqueId;
+        createdEmployeeId = uniqueId;
 
         dashboardPage.navigateToPIM();
         EmployeeListPage listPage = new EmployeeListPage(driver);
@@ -56,6 +59,7 @@ public class DeleteEmployeeTest extends BaseOrangeHRMTest {
         listPage.clickAddEmployee();
         addPage.enterFirstName(createdFirstName);
         addPage.enterLastName(createdLastName);
+        addPage.enterEmployeeId(createdEmployeeId);
         addPage.clickSave();
         addPage.isEmployeeSaved();
 
@@ -102,10 +106,11 @@ public class DeleteEmployeeTest extends BaseOrangeHRMTest {
 
         listPage.searchEmployee(createdFirstName, createdLastName);
 
-        // Click trash icon to open confirmation modal
+        // Click trash icon to open confirmation modal — must click the parent button, not the <i> icon
         List<WebElement> delBtns = WaitUtils.waitForAllElementsVisible(driver, DELETE_BUTTONS, 10);
         assertThat(delBtns).as("Delete buttons should be visible").isNotEmpty();
-        delBtns.get(0).click();
+        WebElement trashBtn = delBtns.get(0).findElement(By.xpath("./ancestor::button[1]"));
+        trashBtn.click();
 
         // Modal must show both Cancel and Delete buttons
         WebElement cancelBtn  = WaitUtils.waitForElementVisible(driver, CANCEL_DELETE_BTN);

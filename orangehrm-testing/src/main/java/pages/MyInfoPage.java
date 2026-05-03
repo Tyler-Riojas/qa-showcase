@@ -1,6 +1,7 @@
 package pages;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
@@ -51,11 +52,18 @@ public class MyInfoPage {
     /** Clicks the Save button in the Personal Details section. */
     public void clickSave() {
         log.info("Clicking Save on Personal Details");
+        // Wait for any loading overlay to disappear — oxd-form-loader intercepts clicks
+        By formLoader = By.cssSelector(".oxd-form-loader");
+        try {
+            WaitUtils.waitForElementInvisible(driver, formLoader, 10);
+        } catch (Exception e) {
+            log.debug("No form loader found or already gone");
+        }
         // The Personal Details section is the first oxd-form on the page.
-        // Select the first submit button (index 1 in XPath = first match).
-        By personalDetailsSaveBtn = By.xpath(
-                "(//button[@type='submit'])[1]");
-        WaitUtils.waitForElementClickable(driver, personalDetailsSaveBtn, 10).click();
+        By personalDetailsSaveBtn = By.xpath("(//button[@type='submit'])[1]");
+        WebElement btn = WaitUtils.waitForElementClickable(driver, personalDetailsSaveBtn, 15);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true)", btn);
+        btn.click();
     }
 
     /**
