@@ -1,7 +1,8 @@
 package core;
 
-import java.time.Duration;
-
+import config.Configuration;
+import enums.BrowserType;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -10,12 +11,12 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.safari.SafariOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import config.Configuration;
-import enums.BrowserType;
-import io.github.bonigarcia.wdm.WebDriverManager;
+import java.time.Duration;
+import java.util.Map;
 
 /**
  * Thread-safe WebDriver factory for parallel test execution.
@@ -112,11 +113,32 @@ public class DriverFactory {
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-extensions");
-        options.addArguments("--disable-infobars");
         options.addArguments("--remote-allow-origins=*");
 
-        // Prevent password save popups
+        // Prevent automation info bar
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+
+        // ── App behavior options (on by default, toggle via test.properties) ──
+        // These options suppress UI interruptions that break most automation.
+        // Disable them only when specifically testing these browser features.
+        Configuration chromeConfig = Configuration.getInstance();
+
+        if (chromeConfig.getBoolean("chrome.disable.infobars", true)) {
+            options.addArguments("--disable-infobars");
+        }
+
+        if (chromeConfig.getBoolean("chrome.disable.notifications", true)) {
+            options.addArguments("--disable-notifications");
+        }
+
+        // Password manager suppression (on by default — interrupts most automation)
+        if (chromeConfig.getBoolean("chrome.disable.password.manager", true)) {
+            options.addArguments("--disable-save-password-bubble");
+            options.setExperimentalOption("prefs", Map.of(
+                    "credentials_enable_service",        false,
+                    "profile.password_manager_enabled",  false
+            ));
+        }
 
         return new ChromeDriver(options);
     }

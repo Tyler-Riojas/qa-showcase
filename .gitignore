@@ -43,3 +43,7 @@ responsive-testing/screenshots/
 orangehrm-testing/target/
 orangehrm-testing/reports/
 orangehrm-testing/screenshots/
+# Eclipse IDE files
+.classpath
+.project
+.settings/
